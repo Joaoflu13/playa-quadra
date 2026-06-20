@@ -16,8 +16,13 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Parâmetro date=YYYY-MM-DD obrigatório" }, { status: 400 });
   }
 
+  // Exige sessão: a grade revela nome/unidade dos moradores (PII/LGPD).
+  // Alinha com GET /api/bookings, que também exige autenticação.
   const session = await auth();
-  const viewerAptId = session?.user?.aptId as string | undefined;
+  if (!session?.user?.aptId) {
+    return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
+  }
+  const viewerAptId = session.user.aptId as string;
 
   const cfg = await getConfig();
   const slots = slotStartsForDate(date, cfg.openHour, cfg.closeHour);

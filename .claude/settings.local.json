@@ -30,7 +30,11 @@
       "Bash(curl -s \"http://localhost:3000/api/availability?date=$\\(date +%Y-%m-%d\\)\")",
       "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); const f=d.slots[0],l=d.slots[d.slots.length-1]; console.log\\('primeiro slot:', new Date\\(f.startAt\\).toLocaleString\\('pt-BR',{timeZone:'America/Sao_Paulo'}\\)\\); console.log\\('ultimo slot:', new Date\\(l.startAt\\).toLocaleString\\('pt-BR',{timeZone:'America/Sao_Paulo'}\\)\\); console.log\\('bookable count:', d.slots.filter\\(s=>s.bookable\\).length\\)\")",
       "Bash(node -e 'const{PrismaClient}=require\\('\\\\''@prisma/client'\\\\''\\);const p=new PrismaClient\\(\\);\\(async\\(\\)=>{await p.booking.deleteMany\\({where:{apartment:{cpf:'\\\\''11122233396'\\\\''}}}\\);await p.apartment.update\\({where:{cpf:'\\\\''11122233396'\\\\''},data:{blockedUntil:null}}\\);console.log\\('\\\\''limpo: reservas e bloqueio do Joao'\\\\''\\);}\\)\\(\\).finally\\(\\(\\)=>p.$disconnect\\(\\)\\)')",
-      "Bash(rm -f /tmp/cj.txt)"
+      "Bash(rm -f /tmp/cj.txt)",
+      "Bash(git rm *)",
+      "Bash(git add *)",
+      "Bash(npx tsc *)",
+      "Bash(git commit *)"
     ]
   }
 }
