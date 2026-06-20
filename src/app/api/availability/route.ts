@@ -1,0 +1,80 @@
+import { NextRequest, NextResponse } from "next/server";
+import { prisma } from "@/lib/db";
+import { auth } from "@/lib/auth";
+import { getConfig } from "@/lib/rules";
+import { slotStartsForDate, COURT_ID, TZ_OFFSET } from "@/lib/availability";
+
+/**
+ * GET /api/availability?date=YYYY-MM-DD
+ * Grade de slots do dia. Para slots ocupados, informa quem marcou e o estado
+ * de "procuro parceiros". O viewer logado recebe também: se a reserva é dele,
+ * o id da reserva e se já sinalizou interesse.
+ */
+export async function GET(req: NextRequest) {
+  const date = req.nextUrl.searchParams.get("date");
+  if (!date || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return NextResponse.json({ error: "Parâmetro date=YYYY-MM-DD obrigatório" }, { status: 400 });
+  }
+
+  const session = await auth();
+  const viewerAptId = session?.user?.aptId as string | undefined;
+
+  const cfg = await getConfig();
+  const slots = slotStartsForDate(date, cfg.openHour, cfg.closeHour);
+
+  const dayStart = new Date(`${date}T00:00:00${TZ_OFFSET}`);
+  const dayEnd = new Date(dayStart.getTime() + 86_400_000);
+
+  const booked = await prisma.booking.findMany({
+    where: {
+      courtId: COURT_ID,
+      status: "CONFIRMED",
+      startAt: { gte: dayStart, lt: dayEnd },
+    },
+    select: {
+      id: true,
+      startAt: true,
+      aptId: true,
+      openForPlayers: true,
+      apartment: { select: { label: true, unit: true } },
+      interests: {
+        select: { aptId: true, apartment: { select: { label: true, unit: true } } },
+      },
+    },
+  });
+  const byStart = new Map(booked.map((b) => [b.startAt.getTime(), b]));
+
+  const now = new Date();
+  const maxDate = new Date(now.getTime() + cfg.advanceDays * 86_400_000);
+
+  const grid = slots.map((start) => {
+    const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
+    const b = byStart.get(start.getTime());
+    const taken = !!b;
+    const bookable = !taken && start > now && start <= maxDate;
+
+    if (!b) {
+      return { startAt: start.toISOString(), endAt: end.toISOString(), taken, bookable };
+    }
+
+    const withUnit = (label: string, unit: string) =>
+      unit ? `${label} (${unit})` : label;
+    const mine = viewerAptId === b.aptId;
+    return {
+      startAt: start.toISOString(),
+      endAt: end.toISOString(),
+      taken,
+      bookable,
+      bookingId: b.id,
+      ownerLabel: withUnit(b.apartment.label, b.apartment.unit),
+      mine,
+      openForPlayers: b.openForPlayers,
+      interestCount: b.interests.length,
+      // Quem já sinalizou interesse (visível para todos; é um condomínio).
+      interested: b.interests.map((i) => withUnit(i.apartment.label, i.apartment.unit)),
+      iAmInterested: !!viewerAptId && b.interests.some((i) => i.aptId === viewerAptId),
+    };
+  });
+
+  return NextResponse.json({ date, slotMinutes: cfg.slotMinutes, slots: grid });
+}

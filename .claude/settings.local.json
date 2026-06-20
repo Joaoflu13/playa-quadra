@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(Get-ChildItem C:\\\\dev\\\\quadra-projeto -Force | Select-Object Name; Write-Output \"---\"; \\(Get-Command node -ErrorAction SilentlyContinue\\).Source; \\(Get-Command npm -ErrorAction SilentlyContinue\\).Source)",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\")",
+      "PowerShell(npm install 2>&1)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" http://localhost:3000/login)",
+      "Bash(curl -s 'http://localhost:3000/api/availability?date=2026-06-22')",
+      "PowerShell(Get-Process node -ErrorAction SilentlyContinue | Stop-Process -Force -ErrorAction SilentlyContinue; Start-Sleep 2; npx prisma generate 2>&1 | Select-Object -Last 6; Write-Output \"--- tsc ---\"; npx tsc --noEmit 2>&1 | Select-Object -First 20; Write-Output \"exit: $LASTEXITCODE\")",
+      "Bash(until [ -s \"/c/Users/scbv6/AppData/Local/Temp/claude/C--dev-quadra-projeto/584dc177-93c4-4d2a-9c47-5b345919dceb/tasks/bjergy04o.output\" ]; do sleep 5; done; sleep 3; cat \"/c/Users/scbv6/AppData/Local/Temp/claude/C--dev-quadra-projeto/584dc177-93c4-4d2a-9c47-5b345919dceb/tasks/bjergy04o.output\")",
+      "Bash(curl -s -o /dev/null http://localhost:3000/login)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login)",
+      "Bash(echo \"login: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/)",
+      "Bash(echo \"home: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/admin)",
+      "Bash(echo \"admin \\(sem login → redirect\\): $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/admin\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/conta)",
+      "Bash(echo \"conta \\(redirect s/ login\\): $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/conta\\)\")",
+      "Bash(curl -s -w ' [%{http_code}]' http://localhost:3000/api/cron/reminders)",
+      "Bash(echo \"cron reminders: $\\(curl -s -w ' [%{http_code}]' http://localhost:3000/api/cron/reminders\\)\")",
+      "Bash(curl -s http://localhost:3000/api/cron/reminders)",
+      "Bash(echo \"1ª chamada: $\\(curl -s http://localhost:3000/api/cron/reminders\\)\")",
+      "Bash(echo \"2ª chamada \\(idempotência\\): $\\(curl -s http://localhost:3000/api/cron/reminders\\)\")",
+      "Bash(npx tsx *)",
+      "Bash(curl -s 'http://localhost:3000/api/availability?date=2026-06-25')",
+      "Bash(python -c \"import sys,json; d=json.load\\(sys.stdin\\); s=[x for x in d['slots'] if x['taken']][0]; print\\(json.dumps\\(s, ensure_ascii=False, indent=2\\)\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); console.log\\(JSON.stringify\\(d.slots.find\\(x=>x.taken\\), null, 2\\)\\)\")",
+      "PowerShell($env:PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION = \"Sim, pode resetar\"; npx prisma db push --force-reset --accept-data-loss 2>&1 | Select-Object -Last 5; Write-Output \"--- seed ---\"; npm run db:seed 2>&1 | Select-Object -Last 8)",
+      "Bash(curl -s \"http://localhost:3000/api/availability?date=$\\(date +%Y-%m-%d\\)\")",
+      "Bash(node -e \"const d=JSON.parse\\(require\\('fs'\\).readFileSync\\(0,'utf8'\\)\\); const f=d.slots[0],l=d.slots[d.slots.length-1]; console.log\\('primeiro slot:', new Date\\(f.startAt\\).toLocaleString\\('pt-BR',{timeZone:'America/Sao_Paulo'}\\)\\); console.log\\('ultimo slot:', new Date\\(l.startAt\\).toLocaleString\\('pt-BR',{timeZone:'America/Sao_Paulo'}\\)\\); console.log\\('bookable count:', d.slots.filter\\(s=>s.bookable\\).length\\)\")",
+      "Bash(node -e 'const{PrismaClient}=require\\('\\\\''@prisma/client'\\\\''\\);const p=new PrismaClient\\(\\);\\(async\\(\\)=>{await p.booking.deleteMany\\({where:{apartment:{cpf:'\\\\''11122233396'\\\\''}}}\\);await p.apartment.update\\({where:{cpf:'\\\\''11122233396'\\\\''},data:{blockedUntil:null}}\\);console.log\\('\\\\''limpo: reservas e bloqueio do Joao'\\\\''\\);}\\)\\(\\).finally\\(\\(\\)=>p.$disconnect\\(\\)\\)')",
+      "Bash(rm -f /tmp/cj.txt)"
+    ]
+  }
+}

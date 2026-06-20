@@ -1,0 +1,113 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  // URL pooled (Neon ...-pooler) usada pelo app em runtime serverless.
+  url      = env("DATABASE_URL")
+  // URL direta (sem pooler) usada por migrate/db push. No Neon é a
+  // connection string sem "-pooler". Se você usar a mesma, omita esta linha.
+  directUrl = env("DIRECT_URL")
+}
+
+enum Role {
+  RESIDENT
+  ADMIN
+}
+
+enum AptStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  NO_SHOW // usado a partir do V1
+  DONE
+}
+
+/// A conta é o MORADOR (1 login por pessoa). Login pelo CPF.
+/// Mantém o nome "Apartment" e o campo "aptId" nas relações para não quebrar
+/// o histórico de dados; semanticamente, hoje, representa um morador.
+model Apartment {
+  id           String     @id @default(cuid())
+  cpf          String     @unique // login (só dígitos)
+  label        String     // nome de exibição do morador, ex "João Silva"
+  unit         String     @default("") // unidade, ex "Bloco A - 304"
+  email        String?    @unique // opcional, para confirmação/lembrete
+  passwordHash String
+  role         Role       @default(RESIDENT)
+  status       AptStatus  @default(ACTIVE)
+  blockedUntil DateTime?  // bloqueio temporário por falta (no-show)
+  createdAt    DateTime   @default(now())
+  bookings     Booking[]
+  penalties    Penalty[]
+  interests    JoinInterest[]
+}
+
+/// Única hoje; modelada como tabela para abrir multi-quadra no V2 sem migração disruptiva.
+model Court {
+  id       String    @id @default(cuid())
+  name     String
+  bookings Booking[]
+}
+
+model Booking {
+  id        String        @id @default(cuid())
+  courtId   String
+  court     Court         @relation(fields: [courtId], references: [id])
+  aptId     String
+  apartment Apartment     @relation(fields: [aptId], references: [id])
+  startAt   DateTime
+  endAt     DateTime
+  status    BookingStatus @default(CONFIRMED)
+  createdAt DateTime      @default(now())
+  // Marca quando o e-mail de lembrete foi enviado (evita duplicar no cron).
+  reminderSentAt DateTime?
+  // "Procuro parceiros": dono abre o horário p/ outros sinalizarem interesse.
+  openForPlayers Boolean   @default(false)
+  interests JoinInterest[]
+
+  // Trava de integridade: nunca duas reservas no mesmo slot da mesma quadra.
+  @@unique([courtId, startAt])
+  @@index([aptId, startAt])
+  @@index([startAt])
+}
+
+/// Interesse de um morador em jogar numa reserva aberta ("procuro parceiros").
+model JoinInterest {
+  id        String    @id @default(cuid())
+  bookingId String
+  booking   Booking   @relation(fields: [bookingId], references: [id], onDelete: Cascade)
+  aptId     String
+  apartment Apartment @relation(fields: [aptId], references: [id])
+  createdAt DateTime  @default(now())
+
+  // Um morador só sinaliza interesse uma vez por reserva.
+  @@unique([bookingId, aptId])
+  @@index([bookingId])
+}
+
+/// Singleton (id = 1). Editável pelo admin sem redeploy.
+model RuleConfig {
+  id                 Int @id @default(1)
+  slotMinutes        Int @default(60)
+  openHour           Int @default(8)
+  closeHour          Int @default(22)
+  advanceDays        Int @default(1)
+  maxActivePerApt    Int @default(2)
+  maxWeeklyPerApt    Int @default(3)
+  cancelMinNoticeMin Int @default(120)
+  noShowBlockDays    Int @default(7) // dias de bloqueio por falta
+}
+
+/// V1 — rastreio de no-show / late-cancel para suspensão automática.
+model Penalty {
+  id        String    @id @default(cuid())
+  aptId     String
+  apartment Apartment @relation(fields: [aptId], references: [id])
+  reason    String // NO_SHOW | LATE_CANCEL
+  createdAt DateTime  @default(now())
+}
