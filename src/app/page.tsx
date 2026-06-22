@@ -15,7 +15,8 @@ export default async function HomePage() {
   }
 
   return (
-    <main className="container">
+    <main className="home-bg">
+      <div className="container">
       <div style={{ marginBottom: 16 }}>
         <CourtPhoto />
       </div>
@@ -41,6 +42,7 @@ export default async function HomePage() {
         </div>
       </div>
       <BookingBoard />
+      </div>
     </main>
   );
 }

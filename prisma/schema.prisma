@@ -46,6 +46,19 @@ model Apartment {
   penalties    Penalty[]
   interests    JoinInterest[]
   notifications Notification[]
+  resetTokens  PasswordResetToken[]
+}
+
+/// Token de redefinição de senha (esqueci minha senha). Expira em ~1h.
+model PasswordResetToken {
+  id        String    @id @default(cuid())
+  token     String    @unique
+  aptId     String
+  apartment Apartment @relation(fields: [aptId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime  @default(now())
+
+  @@index([aptId])
 }
 
 /// Notificação in-app para um morador (ex.: alguém demonstrou interesse).

@@ -69,6 +69,23 @@ export async function sendBookingConfirmation(to: string, label: string, start: 
   });
 }
 
+export async function sendPasswordReset(to: string, label: string, url: string) {
+  await send({
+    to,
+    subject: "Redefinição de senha — Quadra de Tênis",
+    html: shell(
+      "Redefinir senha 🔑",
+      `<p>Olá, <strong>${label}</strong>!</p>
+       <p>Recebemos um pedido para redefinir sua senha. Clique no botão abaixo
+       (o link expira em 1 hora):</p>
+       <p style="margin:20px 0">
+         <a href="${url}" style="background:#16a34a;color:#fff;padding:12px 20px;border-radius:8px;text-decoration:none;font-weight:600">Criar nova senha</a>
+       </p>
+       <p style="font-size:13px;color:#94a3b8">Se não foi você, ignore este e-mail.</p>`
+    ),
+  });
+}
+
 export async function sendBookingReminder(to: string, label: string, start: Date, end: Date) {
   await send({
     to,

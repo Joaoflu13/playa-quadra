@@ -38,7 +38,19 @@
       "Skill(code-review)",
       "Skill(code-review:*)",
       "Bash(echo \"login HTTP: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login\\)\")",
-      "Bash(curl -s http://localhost:3000/login)"
+      "Bash(curl -s http://localhost:3000/login)",
+      "mcp__visualize__read_me",
+      "Bash(curl -s -o /dev/null -w '%{http_code} tipo=%{content_type}' http://localhost:3000/quadra.jpg)",
+      "Bash(echo \"HTTP da foto: $\\(curl -s -o /dev/null -w '%{http_code} tipo=%{content_type}' http://localhost:3000/quadra.jpg\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/condominio.jpg)",
+      "Bash(echo \"condominio.jpg: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/condominio.jpg\\)\")",
+      "Bash(echo \"home HTTP: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/\\)\")",
+      "Bash(git checkout *)",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/esqueci)",
+      "Bash(echo \"esqueci: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/esqueci\\)\")",
+      "Bash(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/esqueci?sent=1')",
+      "Bash(echo \"esqueci?sent: $\\(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/esqueci?sent=1'\\)\")",
+      "Bash(curl -s 'http://localhost:3000/redefinir')"
     ]
   }
 }

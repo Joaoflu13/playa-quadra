@@ -6,6 +6,7 @@ import { formatCpf } from "@/lib/cpf";
 import {
   updateRules,
   createApartment,
+  importResidents,
   setAptStatus,
   resetPassword,
   markNoShow,
@@ -114,6 +115,38 @@ export default async function AdminPage() {
           </div>
           <button className="btn" type="submit" style={{ marginTop: 16 }}>
             Cadastrar
+          </button>
+        </form>
+      </section>
+
+      {/* === Importar em massa (CSV) === */}
+      <section className="card" style={{ marginBottom: 20 }}>
+        <h2 style={{ marginTop: 0 }}>Importar moradores (em massa)</h2>
+        <p className="muted">
+          Uma linha por morador, no formato: <code>CPF, Nome, Unidade, E-mail</code> (e-mail
+          opcional). Ex.: <code>123.456.789-09, Ana Lima, Bloco C 201, ana@email.com</code>
+        </p>
+        <form action={importResidents}>
+          <textarea
+            name="csv"
+            rows={6}
+            placeholder={"111.111.111-11, Fulano, Bloco A 101\n222.222.222-22, Beltrano, Bloco A 102, beltrano@email.com"}
+            style={{
+              width: "100%",
+              padding: "10px 12px",
+              borderRadius: 10,
+              border: "1px solid var(--border)",
+              fontFamily: "monospace",
+              fontSize: 14,
+              resize: "vertical",
+            }}
+          />
+          <div style={{ marginTop: 12, maxWidth: 280 }}>
+            <label htmlFor="defaultPassword">Senha provisória (para todos)</label>
+            <input id="defaultPassword" name="defaultPassword" required minLength={6} defaultValue="playa123" />
+          </div>
+          <button className="btn" type="submit" style={{ marginTop: 12 }}>
+            Importar lista
           </button>
         </form>
       </section>

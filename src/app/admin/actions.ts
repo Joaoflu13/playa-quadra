@@ -56,6 +56,41 @@ export async function createApartment(form: FormData) {
   revalidatePath("/admin");
 }
 
+/**
+ * Importa moradores em massa a partir de texto colado (uma linha por morador):
+ *   cpf, nome, unidade, email(opcional)
+ * Separador vírgula ou ponto-e-vírgula. Usa uma senha provisória única para todos.
+ * Ignora linhas com CPF inválido ou já cadastrado.
+ */
+export async function importResidents(form: FormData) {
+  await requireAdmin();
+  const raw = String(form.get("csv") ?? "");
+  const defaultPassword = String(form.get("defaultPassword") ?? "").trim();
+  if (defaultPassword.length < 6) return;
+
+  const passwordHash = await bcrypt.hash(defaultPassword, 10);
+  const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
+
+  for (const line of lines) {
+    const parts = line.split(/[;,]/).map((p) => p.trim());
+    const cpf = onlyDigits(parts[0] ?? "");
+    const label = parts[1] ?? "";
+    const unit = parts[2] ?? "";
+    const email = (parts[3] ?? "").toLowerCase() || null;
+    if (!isValidCpf(cpf) || !label) continue;
+
+    const exists = await prisma.apartment.findFirst({
+      where: { OR: [{ cpf }, ...(email ? [{ email }] : [])] },
+    });
+    if (exists) continue;
+
+    await prisma.apartment.create({
+      data: { cpf, label, unit, email, passwordHash, role: "RESIDENT" },
+    });
+  }
+  revalidatePath("/admin");
+}
+
 /** Suspende ou reativa um morador. */
 export async function setAptStatus(aptId: string, status: "ACTIVE" | "SUSPENDED") {
   await requireAdmin();
