@@ -68,14 +68,34 @@ troca de senha (`/conta`) · esqueci-minha-senha por token (`/esqueci`,`/redefin
 - Maria Souza (A-304): `444.555.666-19`
 - Carlos Lima (B-502): `777.888.999-41`
 
-## Pendências / próximos passos
-- **E-mail real:** setar `RESEND_API_KEY` na Vercel (conta grátis em resend.com) p/ confirmação/lembrete/reset saírem de verdade.
-- Contexto de negócio: o dono vai **vender o serviço ao síndico**. Roadmap de venda: outras áreas comuns
+## Handoff 2026-06-22 (sessão de melhorias)
+**Entregue e no ar** (commits desta data):
+- Segurança: senhas das contas demo **rotacionadas** (`trocar123` não loga mais); credenciais saíram deste arquivo.
+- UX: confirmação ao reservar/cancelar; slots fora da janela mostram "abre depois" (≠ ocupado).
+- Mobile: viewport explícito + grade densa + empilhamento (`globals.css` media 520px).
+- Login: rate-limit anti força-bruta (`src/lib/rateLimit.ts`, por CPF).
+- LGPD: nome de quem reservou só visível p/ dono, síndico ou em "procuro parceiros" (`api/availability`).
+- Síndico: **relatório de uso** (ocupação/reservas/cancelados/faltas/ranking) no topo de `/admin`.
+- **#8 Bloqueio da quadra** (`CourtBlock`): síndico bloqueia faixas (manutenção/torneio); availability + POST respeitam.
+- **#10 Reserva fixa semanal** (`RecurringBooking`): materializa 8 semanas, pula conflitos; encerrar cancela futuras.
+- E-mail: `RESEND_API_KEY` configurada (local + Vercel). Resend em **modo teste** → só entrega ao e-mail da conta enquanto não houver domínio verificado.
+- Lembrete: `LEAD_HOURS=3` em `api/cron/reminders`, pensado p/ **cron externo horário** (cron-job.org) com header `Authorization: Bearer $CRON_SECRET`.
+
+**Pendências (continuar daqui):**
+1. **Cron externo:** criar job em cron-job.org → URL `…/api/cron/reminders`, a cada hora, header Authorization Bearer com o **CRON_SECRET novo** (definir o mesmo valor na Vercel e no cron-job.org; redeploy).
+2. **Domínio na Resend:** o usuário TEM domínio. Verificar (Domains → Add → registros DNS) e então setar `EMAIL_FROM` (Vercel + `.env`) com `…@<dominio-verificado>`; redeploy. Perguntar qual é o domínio.
+3. **Auto-cadastro do morador:** discutir — preferência: lista pré-autorizada de CPFs (morador só ativa criando senha).
+4. **Apresentação ao síndico:** objetivo original do usuário; montar slides/roteiro.
+- Conta ADMIN real do dono: CPF `122.588.097-11` (senha definida pelo usuário, não `trocar123`).
+- Banco de produção (Supabase, projeto `udzngfysalxnmgomnofi`) já migrado com as tabelas novas.
+
+## Contexto de negócio
+- O dono vai **vender o serviço ao síndico**. Roadmap de venda: outras áreas comuns
   (churrasqueira, salão), piloto 30 dias grátis.
 
 ## Notas de ambiente
 - Banco anterior era Neon, mas o **Neon free do usuário estourou cota** (projeto do "bolão"); por isso a quadra usa **Supabase** (separado).
-- Cron na Vercel Hobby roda **1x/dia** (`vercel.json`: `0 11 * * *`).
+- Cron: Vercel Hobby roda **1x/dia** (`vercel.json`); por isso o lembrete usa **cron externo horário** (cron-job.org) batendo em `/api/cron/reminders` com `Authorization: Bearer $CRON_SECRET`. `LEAD_HOURS=3`.
 - Prisma com Supabase: app usa pooled (6543, pgbouncer); migrações/seed usam direto (5432).
 - Dev em Windows/PowerShell: cuidado com escape de `$` em `node -e` (use o Bash do Git pra esses comandos).
 - Fotos em `public/quadra.jpg` (hero) e `public/condominio.jpg` (fundo/login) — versionadas.
