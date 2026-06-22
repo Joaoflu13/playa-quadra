@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
+import { sendInterestNotice } from "@/lib/mail";
 
 /**
  * POST /api/bookings/interest  { bookingId }
@@ -62,6 +63,17 @@ export async function POST(req: NextRequest) {
       message: `${quem} tem interesse em jogar no seu horário de ${quando}.`,
     },
   });
+
+  // Avisa o dono também por e-mail (se tiver cadastrado). Não bloqueia a resposta.
+  const owner = await prisma.apartment.findUnique({
+    where: { id: booking.aptId },
+    select: { email: true, label: true },
+  });
+  if (owner?.email) {
+    void sendInterestNotice(owner.email, owner.label, quem, booking.startAt, booking.endAt).catch(
+      () => {}
+    );
+  }
 
   return NextResponse.json({ ok: true });
 }

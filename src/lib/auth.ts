@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { onlyDigits } from "@/lib/cpf";
+import { isLocked, registerFailure, clearFailures } from "@/lib/rateLimit";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
   session: { strategy: "jwt" },
@@ -17,12 +18,22 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         const password = String(creds?.password ?? "");
         if (!cpf || !password) return null;
 
+        // Anti força-bruta: bloqueia o CPF após tentativas erradas demais.
+        if (isLocked(cpf)) return null;
+
         const apt = await prisma.apartment.findUnique({ where: { cpf } });
-        if (!apt) return null;
+        if (!apt) {
+          registerFailure(cpf);
+          return null;
+        }
 
         const ok = await bcrypt.compare(password, apt.passwordHash);
-        if (!ok) return null;
+        if (!ok) {
+          registerFailure(cpf);
+          return null;
+        }
 
+        clearFailures(cpf);
         // O "name" exibido é o nome do morador.
         return { id: apt.id, email: apt.email ?? undefined, name: apt.label, role: apt.role };
       },

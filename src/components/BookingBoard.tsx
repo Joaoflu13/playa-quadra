@@ -137,7 +137,15 @@ export default function BookingBoard() {
 
   const book = (startAt: string) =>
     api("/api/bookings", "POST", { startAt }, startAt);
-  const cancel = (id: string) => api("/api/bookings", "DELETE", { id }, id);
+  const cancel = (id: string) => {
+    if (
+      !window.confirm(
+        "Cancelar esta reserva? O horário será liberado para os outros moradores."
+      )
+    )
+      return;
+    return api("/api/bookings", "DELETE", { id }, id);
+  };
   const toggleOpen = (id: string, openForPlayers: boolean) =>
     api("/api/bookings", "PATCH", { id, openForPlayers }, id);
   const setInterest = (bookingId: string, want: boolean) =>
@@ -153,7 +161,7 @@ export default function BookingBoard() {
         ) : (
           <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
             {mine.map((b) => (
-              <li key={b.id} className="row" style={{ padding: "8px 0" }}>
+              <li key={b.id} className="row row-stack" style={{ padding: "8px 0" }}>
                 <span>
                   {prettyDate(todayFrom(new Date(b.startAt)))} · {hhmm(b.startAt)}–
                   {hhmm(b.endAt)}
@@ -231,16 +239,18 @@ export default function BookingBoard() {
                   >
                     {hhmm(s.startAt)}
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
-                      {shortLabel(s.ownerLabel ?? "")}
+                      {s.ownerLabel ? shortLabel(s.ownerLabel) : "ocupado"}
                       {s.openForPlayers ? " · 🎾 vaga" : ""}
                     </div>
                   </button>
                 );
               }
               if (!s.bookable) {
+                // Livre, mas ainda fora da janela de reserva (abre mais perto).
                 return (
-                  <div key={s.startAt} className="slot slot-taken">
+                  <div key={s.startAt} className="slot slot-future" title="Abre para reserva mais perto da data">
                     {hhmm(s.startAt)}
+                    <div style={{ fontSize: 11, fontWeight: 400 }}>abre depois</div>
                   </div>
                 );
               }
@@ -248,8 +258,9 @@ export default function BookingBoard() {
                 <button
                   key={s.startAt}
                   className="slot slot-free"
+                  style={ring}
                   disabled={busy === s.startAt}
-                  onClick={() => book(s.startAt)}
+                  onClick={() => setSelected(s.startAt)}
                 >
                   {hhmm(s.startAt)}
                   <div style={{ fontSize: 11, fontWeight: 400, color: "var(--muted)" }}>
@@ -263,6 +274,35 @@ export default function BookingBoard() {
         {error && <p className="error">{error}</p>}
       </section>
 
+      {/* Confirmação de reserva (slot livre selecionado) */}
+      {selectedSlot && !selectedSlot.taken && selectedSlot.bookable && (
+        <section className="card">
+          <div className="row">
+            <h2 style={{ marginTop: 0 }}>
+              Reservar {hhmm(selectedSlot.startAt)}–{hhmm(selectedSlot.endAt)}?
+            </h2>
+            <button className="btn btn-2" onClick={() => setSelected(null)}>
+              Fechar
+            </button>
+          </div>
+          <p className="muted">
+            {prettyDate(date)} · das {hhmm(selectedSlot.startAt)} às {hhmm(selectedSlot.endAt)}.
+            Lembre-se: faltar sem cancelar gera bloqueio temporário.
+          </p>
+          <button
+            className="btn"
+            disabled={busy === selectedSlot.startAt}
+            onClick={async () => {
+              const at = selectedSlot.startAt;
+              await book(at);
+              setSelected(null);
+            }}
+          >
+            {busy === selectedSlot.startAt ? "Reservando..." : "✅ Confirmar reserva"}
+          </button>
+        </section>
+      )}
+
       {/* Detalhe do slot selecionado */}
       {selectedSlot && selectedSlot.taken && (
         <section className="card">
@@ -275,8 +315,14 @@ export default function BookingBoard() {
             </button>
           </div>
           <p>
-            Reservado por <strong>{selectedSlot.ownerLabel}</strong>
-            {selectedSlot.mine && " (você)"}
+            {selectedSlot.ownerLabel ? (
+              <>
+                Reservado por <strong>{selectedSlot.ownerLabel}</strong>
+                {selectedSlot.mine && " (você)"}
+              </>
+            ) : (
+              <>Horário <strong>ocupado</strong></>
+            )}
           </p>
 
           {/* Dono gerencia "procuro parceiros" */}

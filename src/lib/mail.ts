@@ -86,6 +86,26 @@ export async function sendPasswordReset(to: string, label: string, url: string) 
   });
 }
 
+export async function sendInterestNotice(
+  to: string,
+  ownerLabel: string,
+  interestedName: string,
+  start: Date,
+  end: Date
+) {
+  await send({
+    to,
+    subject: "Alguém quer jogar no seu horário — Quadra de Tênis",
+    html: shell(
+      "Tem gente a fim de jogar 🎾",
+      `<p>Olá, <strong>${ownerLabel}</strong>!</p>
+       <p><strong>${interestedName}</strong> sinalizou interesse em jogar na sua reserva de:</p>
+       <p style="font-size:18px"><strong>${fmt(start, end)}</strong></p>
+       <p>Combine com ele(a) pelo condomínio se quiser dividir a quadra.</p>`
+    ),
+  });
+}
+
 export async function sendBookingReminder(to: string, label: string, start: Date, end: Date) {
   await send({
     to,

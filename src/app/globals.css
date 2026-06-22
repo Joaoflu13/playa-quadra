@@ -171,6 +171,15 @@ label {
   border-style: dashed;
 }
 
+/* Slot livre porém fora da janela de reserva (abre mais perto da data). */
+.slot-future {
+  background: var(--surface);
+  color: var(--muted);
+  cursor: not-allowed;
+  border-style: dotted;
+  opacity: 0.7;
+}
+
 .slot-mine {
   background: linear-gradient(135deg, var(--accent), var(--accent-700));
   color: #fff;
@@ -281,6 +290,38 @@ label {
   .login-split__form {
     flex: 1;
     max-width: none;
+  }
+}
+
+/* === Responsivo: celular === */
+@media (max-width: 520px) {
+  .container {
+    padding: 16px 12px 48px;
+  }
+  .card {
+    padding: 16px;
+  }
+  /* Tiles menores cabem 3 colunas em telas estreitas. */
+  .slot-grid {
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 8px;
+  }
+  .slot {
+    padding: 10px 6px;
+    font-size: 14px;
+  }
+  .hero img {
+    height: 180px;
+  }
+  /* "Minhas reservas": empilha texto e botão em vez de espremer. */
+  .row-stack {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 8px;
+  }
+  .row-stack .btn,
+  .row-stack .btn-danger {
+    width: 100%;
   }
 }
 

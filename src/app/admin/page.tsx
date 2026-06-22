@@ -55,6 +55,34 @@ export default async function AdminPage() {
 
   const now = new Date();
 
+  // === Relatório de uso (últimos 30 dias) ===
+  const since = new Date(now.getTime() - 30 * 86_400_000);
+  const recent = await prisma.booking.findMany({
+    where: { startAt: { gte: since, lt: now } },
+    select: { status: true, aptId: true, apartment: { select: { label: true, unit: true } } },
+  });
+  const confirmed = recent.filter((b) => b.status === "CONFIRMED").length;
+  const cancelled = recent.filter((b) => b.status === "CANCELLED").length;
+  const noShow = recent.filter((b) => b.status === "NO_SHOW").length;
+  const slotsPerDay = Math.max(0, cfg.closeHour - cfg.openHour);
+  const capacity = slotsPerDay * 30;
+  const occupancy = capacity > 0 ? Math.round((confirmed / capacity) * 100) : 0;
+  // Ranking de moradores por reservas efetivas (exclui canceladas).
+  const byApt = new Map<string, { label: string; unit: string; count: number }>();
+  for (const b of recent) {
+    if (b.status === "CANCELLED") continue;
+    const cur = byApt.get(b.aptId) ?? { label: b.apartment.label, unit: b.apartment.unit, count: 0 };
+    cur.count += 1;
+    byApt.set(b.aptId, cur);
+  }
+  const topApts = [...byApt.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+  const stats = [
+    { label: "Taxa de ocupação", value: `${occupancy}%`, hint: "reservas ÷ horários disponíveis" },
+    { label: "Reservas", value: confirmed, hint: "confirmadas (30 dias)" },
+    { label: "Cancelamentos", value: cancelled, hint: "no período" },
+    { label: "Faltas", value: noShow, hint: "no-show marcado" },
+  ];
+
   return (
     <main className="home-bg">
       <div className="container">
@@ -64,6 +92,44 @@ export default async function AdminPage() {
           ← Reservas
         </Link>
       </div>
+
+      {/* === Relatório de uso === */}
+      <section className="card" style={{ marginBottom: 20 }}>
+        <h2 style={{ marginTop: 0 }}>Relatório de uso (últimos 30 dias)</h2>
+        <div className="slot-grid" style={{ gridTemplateColumns: "repeat(auto-fill,minmax(140px,1fr))" }}>
+          {stats.map((s) => (
+            <div
+              key={s.label}
+              style={{
+                background: "var(--surface-2)",
+                border: "1px solid var(--border)",
+                borderRadius: 12,
+                padding: "14px 12px",
+                textAlign: "center",
+              }}
+            >
+              <div style={{ fontSize: 26, fontWeight: 800, color: "var(--primary-700)" }}>
+                {s.value}
+              </div>
+              <div style={{ fontWeight: 600, fontSize: 13 }}>{s.label}</div>
+              <div className="muted" style={{ fontSize: 11 }}>{s.hint}</div>
+            </div>
+          ))}
+        </div>
+        {topApts.length > 0 && (
+          <div style={{ marginTop: 16 }}>
+            <strong>Moradores que mais usam</strong>
+            <ol style={{ margin: "8px 0 0", paddingLeft: 20 }}>
+              {topApts.map((a) => (
+                <li key={a.label + a.unit}>
+                  {a.label}
+                  {a.unit ? ` (${a.unit})` : ""} — <strong>{a.count}</strong> reserva(s)
+                </li>
+              ))}
+            </ol>
+          </div>
+        )}
+      </section>
 
       {/* === Regras === */}
       <section className="card" style={{ marginBottom: 20 }}>

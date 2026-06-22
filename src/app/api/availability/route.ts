@@ -23,6 +23,7 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   const viewerAptId = session.user.aptId as string;
+  const viewerIsAdmin = session.user.role === "ADMIN";
 
   const cfg = await getConfig();
   const slots = slotStartsForDate(date, cfg.openHour, cfg.closeHour);
@@ -65,18 +66,27 @@ export async function GET(req: NextRequest) {
     const withUnit = (label: string, unit: string) =>
       unit ? `${label} (${unit})` : label;
     const mine = viewerAptId === b.aptId;
+
+    // LGPD: o nome de quem reservou só é revelado quando há base para isso —
+    // é a sua reserva, você é o síndico, ou o dono abriu "procuro parceiros"
+    // (consentiu aparecer). Caso contrário, o slot é apenas "Ocupado".
+    const canSeeOwner = mine || viewerIsAdmin || b.openForPlayers;
+
     return {
       startAt: start.toISOString(),
       endAt: end.toISOString(),
       taken,
       bookable,
       bookingId: b.id,
-      ownerLabel: withUnit(b.apartment.label, b.apartment.unit),
+      ownerLabel: canSeeOwner ? withUnit(b.apartment.label, b.apartment.unit) : null,
       mine,
       openForPlayers: b.openForPlayers,
       interestCount: b.interests.length,
-      // Quem já sinalizou interesse (visível para todos; é um condomínio).
-      interested: b.interests.map((i) => withUnit(i.apartment.label, i.apartment.unit)),
+      // Lista de interessados só para o dono e o síndico (quem precisa decidir).
+      interested:
+        mine || viewerIsAdmin
+          ? b.interests.map((i) => withUnit(i.apartment.label, i.apartment.unit))
+          : [],
       iAmInterested: !!viewerAptId && b.interests.some((i) => i.aptId === viewerAptId),
     };
   });
