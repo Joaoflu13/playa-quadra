@@ -70,28 +70,45 @@ export default function BookingBoard() {
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
 
-  const load = useCallback(async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const [availRes, mineRes] = await Promise.all([
-        fetch(`/api/availability?date=${date}`),
-        fetch(`/api/bookings`),
-      ]);
-      const avail = await availRes.json();
-      const mineData = await mineRes.json();
-      if (!availRes.ok) throw new Error(avail.error ?? "Falha ao carregar");
-      setSlots(avail.slots ?? []);
-      setMine(mineData.bookings ?? []);
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Erro ao carregar");
-    } finally {
-      setLoading(false);
-    }
-  }, [date]);
+  // silent=true: atualiza em segundo plano sem mostrar "Carregando…"
+  const load = useCallback(
+    async (silent = false) => {
+      if (!silent) setLoading(true);
+      setError(null);
+      try {
+        const [availRes, mineRes] = await Promise.all([
+          fetch(`/api/availability?date=${date}`),
+          fetch(`/api/bookings`),
+        ]);
+        const avail = await availRes.json();
+        const mineData = await mineRes.json();
+        if (!availRes.ok) throw new Error(avail.error ?? "Falha ao carregar");
+        setSlots(avail.slots ?? []);
+        setMine(mineData.bookings ?? []);
+      } catch (e) {
+        if (!silent) setError(e instanceof Error ? e.message : "Erro ao carregar");
+      } finally {
+        if (!silent) setLoading(false);
+      }
+    },
+    [date]
+  );
 
   useEffect(() => {
     load();
+  }, [load]);
+
+  // Mantém a grade "ao vivo": atualiza a cada 20s e quando a aba volta ao foco.
+  useEffect(() => {
+    const t = setInterval(() => load(true), 20_000);
+    const onFocus = () => load(true);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", onFocus);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener("focus", onFocus);
+      document.removeEventListener("visibilitychange", onFocus);
+    };
   }, [load]);
 
   const selectedSlot = useMemo(
