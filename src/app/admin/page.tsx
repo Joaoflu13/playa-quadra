@@ -56,7 +56,8 @@ export default async function AdminPage() {
   const now = new Date();
 
   return (
-    <main className="container">
+    <main className="home-bg">
+      <div className="container">
       <div className="row" style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0 }}>Painel do Síndico</h1>
         <Link href="/" className="btn btn-2">
@@ -243,6 +244,7 @@ export default async function AdminPage() {
           </ul>
         )}
       </section>
+      </div>
     </main>
   );
 }
