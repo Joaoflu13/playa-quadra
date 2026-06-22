@@ -50,7 +50,10 @@
       "Bash(echo \"esqueci: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/esqueci\\)\")",
       "Bash(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/esqueci?sent=1')",
       "Bash(echo \"esqueci?sent: $\\(curl -s -o /dev/null -w '%{http_code}' 'http://localhost:3000/esqueci?sent=1'\\)\")",
-      "Bash(curl -s 'http://localhost:3000/redefinir')"
+      "Bash(curl -s 'http://localhost:3000/redefinir')",
+      "Bash(echo \"AUTH_SECRET=$\\(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(32\\).toString\\('base64'\\)\\)\"\\)\")",
+      "Bash(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(24\\).toString\\('hex'\\)\\)\")",
+      "Bash(echo \"CRON_SECRET=$\\(node -e \"console.log\\(require\\('crypto'\\).randomBytes\\(24\\).toString\\('hex'\\)\\)\"\\)\")"
     ]
   }
 }
