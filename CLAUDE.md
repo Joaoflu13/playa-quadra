@@ -58,7 +58,11 @@ troca de senha (`/conta`) · esqueci-minha-senha por token (`/esqueci`,`/redefin
 **import CSV em massa**, suspender/reativar, bloqueio por falta, reset de senha. Só ADMIN acessa o painel
 (guard `requireAdmin` na página E em todas as server actions).
 
-## Logins de demonstração (senha `trocar123`)
+## Logins de demonstração
+> ⚠️ As credenciais NÃO ficam aqui (repositório público). As contas demo existem no
+> banco, mas as senhas foram rotacionadas para um valor privado — peça ao responsável.
+> O `prisma/seed.ts` ainda usa uma senha provisória só para popular um banco LOCAL/novo;
+> nunca rode o seed apontando para produção.
 - Síndico (ADMIN): CPF `100.200.300-88`
 - João Silva (A-101): `111.222.333-96`
 - Maria Souza (A-304): `444.555.666-19`
