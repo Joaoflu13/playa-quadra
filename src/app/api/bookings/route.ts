@@ -97,6 +97,18 @@ export async function POST(req: NextRequest) {
 
   const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
 
+  // Quadra bloqueada pelo síndico (manutenção/torneio) neste intervalo?
+  const block = await prisma.courtBlock.findFirst({
+    where: { courtId: COURT_ID, startAt: { lt: end }, endAt: { gt: start } },
+    select: { reason: true },
+  });
+  if (block) {
+    return NextResponse.json(
+      { error: `Quadra indisponível: ${block.reason}` },
+      { status: 422 }
+    );
+  }
+
   try {
     let aptEmail: string | null = null;
     let aptLabel = "";

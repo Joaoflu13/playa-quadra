@@ -50,6 +50,14 @@ export async function GET(req: NextRequest) {
   });
   const byStart = new Map(booked.map((b) => [b.startAt.getTime(), b]));
 
+  // Bloqueios da quadra que tocam o dia (manutenção, torneio, etc.).
+  const blocks = await prisma.courtBlock.findMany({
+    where: { courtId: COURT_ID, startAt: { lt: dayEnd }, endAt: { gt: dayStart } },
+    select: { startAt: true, endAt: true, reason: true },
+  });
+  const blockFor = (s: Date, e: Date) =>
+    blocks.find((bl) => bl.startAt < e && bl.endAt > s) ?? null;
+
   const now = new Date();
   const maxDate = new Date(now.getTime() + cfg.advanceDays * 86_400_000);
 
@@ -57,10 +65,18 @@ export async function GET(req: NextRequest) {
     const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
     const b = byStart.get(start.getTime());
     const taken = !!b;
-    const bookable = !taken && start > now && start <= maxDate;
+    const block = !b ? blockFor(start, end) : null;
+    const bookable = !taken && !block && start > now && start <= maxDate;
 
     if (!b) {
-      return { startAt: start.toISOString(), endAt: end.toISOString(), taken, bookable };
+      return {
+        startAt: start.toISOString(),
+        endAt: end.toISOString(),
+        taken,
+        bookable,
+        blocked: !!block,
+        blockReason: block?.reason ?? null,
+      };
     }
 
     const withUnit = (label: string, unit: string) =>

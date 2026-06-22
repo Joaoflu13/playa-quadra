@@ -49,6 +49,7 @@ model Apartment {
   interests    JoinInterest[]
   notifications Notification[]
   resetTokens  PasswordResetToken[]
+  recurrings   RecurringBooking[]
 }
 
 /// Token de redefinição de senha (esqueci minha senha). Expira em ~1h.
@@ -79,9 +80,42 @@ model Notification {
 
 /// Única hoje; modelada como tabela para abrir multi-quadra no V2 sem migração disruptiva.
 model Court {
-  id       String    @id @default(cuid())
-  name     String
-  bookings Booking[]
+  id         String       @id @default(cuid())
+  name       String
+  bookings   Booking[]
+  blocks     CourtBlock[]
+  recurrings RecurringBooking[]
+}
+
+/// Bloqueio da quadra pelo síndico (manutenção, torneio, chuva, evento).
+/// Nenhum morador pode reservar slots que caiam dentro do intervalo.
+model CourtBlock {
+  id        String   @id @default(cuid())
+  courtId   String
+  court     Court    @relation(fields: [courtId], references: [id])
+  startAt   DateTime
+  endAt     DateTime
+  reason    String   // ex.: "Manutenção", "Torneio interno"
+  createdAt DateTime @default(now())
+
+  @@index([courtId, startAt])
+}
+
+/// Reserva fixa/recorrente (ex.: aula de tênis no mesmo horário toda semana).
+/// O síndico cadastra; o sistema materializa reservas concretas para as
+/// próximas semanas. weekday/hour são em horário local de São Paulo.
+model RecurringBooking {
+  id        String    @id @default(cuid())
+  courtId   String
+  court     Court     @relation(fields: [courtId], references: [id])
+  aptId     String
+  apartment Apartment @relation(fields: [aptId], references: [id])
+  weekday   Int       // 0=domingo … 6=sábado
+  hour      Int       // hora local de início (ex.: 19)
+  createdAt DateTime  @default(now())
+
+  @@unique([courtId, weekday, hour])
+  @@index([aptId])
 }
 
 model Booking {

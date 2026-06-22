@@ -12,7 +12,24 @@ import {
   markNoShow,
   unblock,
   clearPenalties,
+  addBlock,
+  removeBlock,
+  addRecurring,
+  removeRecurring,
 } from "./actions";
+
+const WEEKDAYS = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
+
+function dayHour(d: Date): string {
+  return new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).format(d);
+}
 
 function hhmm(d: Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
@@ -76,6 +93,16 @@ export default async function AdminPage() {
     byApt.set(b.aptId, cur);
   }
   const topApts = [...byApt.values()].sort((a, b) => b.count - a.count).slice(0, 5);
+
+  // Bloqueios futuros e reservas fixas (para as seções de gestão).
+  const blocks = await prisma.courtBlock.findMany({
+    where: { endAt: { gt: now } },
+    orderBy: { startAt: "asc" },
+  });
+  const recurrings = await prisma.recurringBooking.findMany({
+    include: { apartment: { select: { label: true, unit: true } } },
+    orderBy: [{ weekday: "asc" }, { hour: "asc" }],
+  });
   const stats = [
     { label: "Taxa de ocupação", value: `${occupancy}%`, hint: "reservas ÷ horários disponíveis" },
     { label: "Reservas", value: confirmed, hint: "confirmadas (30 dias)" },
@@ -152,6 +179,99 @@ export default async function AdminPage() {
             Salvar regras
           </button>
         </form>
+      </section>
+
+      {/* === Bloquear a quadra (#8) === */}
+      <section className="card" style={{ marginBottom: 20 }}>
+        <h2 style={{ marginTop: 0 }}>Bloquear a quadra</h2>
+        <p className="muted">
+          Manutenção, torneio, evento ou chuva: ninguém reserva no intervalo bloqueado.
+        </p>
+        <form action={addBlock}>
+          <div className="slot-grid" style={grid3}>
+            <div>
+              <label htmlFor="bdate">Dia</label>
+              <input id="bdate" name="date" type="date" required />
+            </div>
+            <div>
+              <label htmlFor="startHour">Das (hora)</label>
+              <input id="startHour" name="startHour" type="number" min={0} max={23} defaultValue={8} required />
+            </div>
+            <div>
+              <label htmlFor="endHour">Até (hora)</label>
+              <input id="endHour" name="endHour" type="number" min={1} max={24} defaultValue={22} required />
+            </div>
+            <div>
+              <label htmlFor="reason">Motivo</label>
+              <input id="reason" name="reason" placeholder="Manutenção" />
+            </div>
+          </div>
+          <button className="btn" type="submit" style={{ marginTop: 16 }}>
+            Bloquear horário
+          </button>
+        </form>
+        {blocks.length > 0 && (
+          <ul style={{ listStyle: "none", padding: 0, margin: "16px 0 0" }}>
+            {blocks.map((bl) => (
+              <li key={bl.id} className="row row-stack" style={{ padding: "8px 0", borderTop: "1px solid var(--border)" }}>
+                <span>
+                  ⛔ {dayHour(bl.startAt)} → {dayHour(bl.endAt)} · <strong>{bl.reason}</strong>
+                </span>
+                <form action={removeBlock.bind(null, bl.id)}>
+                  <button className="btn btn-2" type="submit">Remover</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
+
+      {/* === Reservas fixas / recorrentes (#10) === */}
+      <section className="card" style={{ marginBottom: 20 }}>
+        <h2 style={{ marginTop: 0 }}>Reservas fixas (semanais)</h2>
+        <p className="muted">
+          Ex.: aula de tênis no mesmo horário toda semana. Gera as reservas das próximas
+          8 semanas automaticamente (pula horários já ocupados ou bloqueados).
+        </p>
+        <form action={addRecurring}>
+          <div className="slot-grid" style={grid3}>
+            <div>
+              <label htmlFor="rcpf">CPF do morador</label>
+              <input id="rcpf" name="cpf" inputMode="numeric" placeholder="000.000.000-00" required />
+            </div>
+            <div>
+              <label htmlFor="weekday">Dia da semana</label>
+              <select id="weekday" name="weekday" required
+                style={{ width: "100%", padding: "10px 12px", borderRadius: 10, border: "1px solid var(--border)", background: "var(--surface)", fontSize: 15 }}>
+                {WEEKDAYS.map((w, i) => (
+                  <option key={w} value={i}>{w}</option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label htmlFor="rhour">Hora de início</label>
+              <input id="rhour" name="hour" type="number" min={cfg.openHour} max={cfg.closeHour - 1} defaultValue={cfg.openHour} required />
+            </div>
+          </div>
+          <button className="btn" type="submit" style={{ marginTop: 16 }}>
+            Criar reserva fixa
+          </button>
+        </form>
+        {recurrings.length > 0 && (
+          <ul style={{ listStyle: "none", padding: 0, margin: "16px 0 0" }}>
+            {recurrings.map((r) => (
+              <li key={r.id} className="row row-stack" style={{ padding: "8px 0", borderTop: "1px solid var(--border)" }}>
+                <span>
+                  🎾 <strong>{WEEKDAYS[r.weekday]}</strong> às {String(r.hour).padStart(2, "0")}h ·{" "}
+                  {r.apartment.label}{r.apartment.unit ? ` (${r.apartment.unit})` : ""}
+                </span>
+                <form action={removeRecurring.bind(null, r.id)}>
+                  <button className="btn btn-2" type="submit">Encerrar</button>
+                </form>
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       {/* === Novo morador === */}

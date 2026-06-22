@@ -7,8 +7,10 @@ type Slot = {
   endAt: string;
   taken: boolean;
   bookable: boolean;
+  blocked?: boolean;
+  blockReason?: string | null;
   bookingId?: string;
-  ownerLabel?: string;
+  ownerLabel?: string | null;
   mine?: boolean;
   openForPlayers?: boolean;
   interestCount?: number;
@@ -243,6 +245,17 @@ export default function BookingBoard() {
                       {s.openForPlayers ? " · 🎾 vaga" : ""}
                     </div>
                   </button>
+                );
+              }
+              if (s.blocked) {
+                // Quadra bloqueada pelo síndico (manutenção/torneio/etc.).
+                return (
+                  <div key={s.startAt} className="slot slot-blocked" title={s.blockReason ?? "Indisponível"}>
+                    {hhmm(s.startAt)}
+                    <div style={{ fontSize: 11, fontWeight: 400 }}>
+                      🔧 {s.blockReason ?? "indisponível"}
+                    </div>
+                  </div>
                 );
               }
               if (!s.bookable) {

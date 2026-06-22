@@ -180,6 +180,20 @@ label {
   opacity: 0.7;
 }
 
+/* Quadra bloqueada pelo síndico (manutenção, torneio). */
+.slot-blocked {
+  background: repeating-linear-gradient(
+    45deg,
+    #fdecec,
+    #fdecec 8px,
+    #f7dede 8px,
+    #f7dede 16px
+  );
+  color: #a33;
+  cursor: not-allowed;
+  border-color: #f0c0bd;
+}
+
 .slot-mine {
   background: linear-gradient(135deg, var(--accent), var(--accent-700));
   color: #fff;
