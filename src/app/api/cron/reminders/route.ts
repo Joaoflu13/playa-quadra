@@ -3,7 +3,9 @@ import { prisma } from "@/lib/db";
 import { sendBookingReminder } from "@/lib/mail";
 
 // Quantas horas antes do início enviamos o lembrete (janela de varredura).
-const LEAD_HOURS = 12;
+// Com cron externo de hora em hora (cron-job.org), 3h garante que reservas
+// de qualquer horário — inclusive de manhã cedo — recebam o lembrete a tempo.
+const LEAD_HOURS = 3;
 
 /**
  * GET /api/cron/reminders
