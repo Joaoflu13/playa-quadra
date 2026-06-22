@@ -34,7 +34,9 @@
       "Bash(git rm *)",
       "Bash(git add *)",
       "Bash(npx tsc *)",
-      "Bash(git commit *)"
+      "Bash(git commit *)",
+      "Skill(code-review)",
+      "Skill(code-review:*)"
     ]
   }
 }

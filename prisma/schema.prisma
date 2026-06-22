@@ -45,6 +45,21 @@ model Apartment {
   bookings     Booking[]
   penalties    Penalty[]
   interests    JoinInterest[]
+  notifications Notification[]
+}
+
+/// Notificação in-app para um morador (ex.: alguém demonstrou interesse).
+model Notification {
+  id        String    @id @default(cuid())
+  aptId     String
+  apartment Apartment @relation(fields: [aptId], references: [id], onDelete: Cascade)
+  type      String    // INTEREST | INTEREST_REMOVED | ...
+  message   String
+  bookingId String?
+  read      Boolean   @default(false)
+  createdAt DateTime  @default(now())
+
+  @@index([aptId, read])
 }
 
 /// Única hoje; modelada como tabela para abrir multi-quadra no V2 sem migração disruptiva.

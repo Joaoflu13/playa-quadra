@@ -3,6 +3,7 @@ import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import BookingBoard from "@/components/BookingBoard";
 import CourtPhoto from "@/components/CourtPhoto";
+import NotificationsBell from "@/components/NotificationsBell";
 
 export default async function HomePage() {
   const session = await auth();
@@ -20,7 +21,8 @@ export default async function HomePage() {
           <h1 style={{ margin: 0 }}>Quadra de Tênis</h1>
           <span className="muted">Playa del Mago · {session.user.name}</span>
         </div>
-        <div style={{ display: "flex", gap: 8 }}>
+        <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+          <NotificationsBell />
           {session.user.role === "ADMIN" && (
             <Link href="/admin" className="btn" style={{ background: "var(--panel-2)" }}>
               Painel

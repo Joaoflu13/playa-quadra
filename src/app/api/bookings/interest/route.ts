@@ -39,6 +39,30 @@ export async function POST(req: NextRequest) {
     }
     throw e;
   }
+
+  // Notifica o dono da reserva (in-app).
+  const me = await prisma.apartment.findUnique({
+    where: { id: aptId },
+    select: { label: true, unit: true },
+  });
+  const quando = new Intl.DateTimeFormat("pt-BR", {
+    timeZone: "America/Sao_Paulo",
+    weekday: "short",
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(booking.startAt);
+  const quem = me ? (me.unit ? `${me.label} (${me.unit})` : me.label) : "Um morador";
+  await prisma.notification.create({
+    data: {
+      aptId: booking.aptId,
+      type: "INTEREST",
+      bookingId,
+      message: `${quem} tem interesse em jogar no seu horário de ${quando}.`,
+    },
+  });
+
   return NextResponse.json({ ok: true });
 }
 
