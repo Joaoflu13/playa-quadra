@@ -58,7 +58,7 @@ export default async function AdminPage() {
     <main className="container">
       <div className="row" style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0 }}>Painel do Síndico</h1>
-        <Link href="/" className="btn" style={{ background: "var(--panel-2)" }}>
+        <Link href="/" className="btn btn-2">
           ← Reservas
         </Link>
       </div>
@@ -159,7 +159,7 @@ export default async function AdminPage() {
                       )}
                       {a._count.penalties > 0 && (
                         <form action={clearPenalties.bind(null, a.id)}>
-                          <button className="btn" type="submit" style={{ background: "var(--panel-2)" }}>
+                          <button className="btn btn-2" type="submit">
                             Zerar faltas
                           </button>
                         </form>
@@ -173,7 +173,7 @@ export default async function AdminPage() {
                     style={{ display: "flex", gap: 8, marginTop: 8, maxWidth: 360 }}
                   >
                     <input name="newPassword" placeholder="nova senha provisória" minLength={6} />
-                    <button className="btn" type="submit" style={{ background: "var(--panel-2)", whiteSpace: "nowrap" }}>
+                    <button className="btn btn-2" type="submit" style={{ whiteSpace: "nowrap" }}>
                       Redefinir senha
                     </button>
                   </form>

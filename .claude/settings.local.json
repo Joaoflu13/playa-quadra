@@ -36,7 +36,9 @@
       "Bash(npx tsc *)",
       "Bash(git commit *)",
       "Skill(code-review)",
-      "Skill(code-review:*)"
+      "Skill(code-review:*)",
+      "Bash(echo \"login HTTP: $\\(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/login\\)\")",
+      "Bash(curl -s http://localhost:3000/login)"
     ]
   }
 }

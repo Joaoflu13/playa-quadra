@@ -66,8 +66,8 @@ export default function NotificationsBell() {
   return (
     <div ref={boxRef} style={{ position: "relative" }}>
       <button
-        className="btn"
-        style={{ background: "var(--panel-2)", position: "relative" }}
+        className="btn btn-2"
+        style={{ position: "relative" }}
         onClick={toggle}
         aria-label="Notificações"
       >

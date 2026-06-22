@@ -16,19 +16,21 @@ export default async function HomePage() {
 
   return (
     <main className="container">
-      <div className="row" style={{ marginBottom: 20 }}>
-        <div>
-          <h1 style={{ margin: 0 }}>Quadra de Tênis</h1>
-          <span className="muted">Playa del Mago · {session.user.name}</span>
-        </div>
+      <div style={{ marginBottom: 16 }}>
+        <CourtPhoto />
+      </div>
+      <div className="row" style={{ marginBottom: 20, flexWrap: "wrap" }}>
+        <span className="muted">
+          Olá, <strong style={{ color: "var(--text)" }}>{session.user.name}</strong>
+        </span>
         <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
           <NotificationsBell />
           {session.user.role === "ADMIN" && (
-            <Link href="/admin" className="btn" style={{ background: "var(--panel-2)" }}>
+            <Link href="/admin" className="btn btn-2">
               Painel
             </Link>
           )}
-          <Link href="/conta" className="btn" style={{ background: "var(--panel-2)" }}>
+          <Link href="/conta" className="btn btn-2">
             Minha conta
           </Link>
           <form action={logout}>
@@ -37,9 +39,6 @@ export default async function HomePage() {
             </button>
           </form>
         </div>
-      </div>
-      <div style={{ marginBottom: 20 }}>
-        <CourtPhoto />
       </div>
       <BookingBoard />
     </main>

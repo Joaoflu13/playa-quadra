@@ -158,8 +158,7 @@ export default function BookingBoard() {
       <section className="card">
         <div className="row" style={{ marginBottom: 16 }}>
           <button
-            className="btn"
-            style={{ background: "var(--panel-2)" }}
+            className="btn btn-2"
             disabled={date <= today}
             onClick={() => {
               setSelected(null);
@@ -172,8 +171,7 @@ export default function BookingBoard() {
             {prettyDate(date)}
           </strong>
           <button
-            className="btn"
-            style={{ background: "var(--panel-2)" }}
+            className="btn btn-2"
             onClick={() => {
               setSelected(null);
               setDate(addDays(date, 1));
@@ -255,11 +253,7 @@ export default function BookingBoard() {
             <h2 style={{ marginTop: 0 }}>
               {hhmm(selectedSlot.startAt)}–{hhmm(selectedSlot.endAt)}
             </h2>
-            <button
-              className="btn"
-              style={{ background: "var(--panel-2)" }}
-              onClick={() => setSelected(null)}
-            >
+            <button className="btn btn-2" onClick={() => setSelected(null)}>
               Fechar
             </button>
           </div>

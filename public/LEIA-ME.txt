@@ -1,0 +1,1 @@
+Coloque aqui a foto da quadra como 'quadra.jpg' para aparecer no topo do app.

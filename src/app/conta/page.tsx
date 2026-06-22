@@ -25,7 +25,7 @@ export default async function ContaPage({
     <main className="container" style={{ maxWidth: 420 }}>
       <div className="row" style={{ marginBottom: 20 }}>
         <h1 style={{ margin: 0 }}>Minha conta</h1>
-        <Link href="/" className="btn" style={{ background: "var(--panel-2)" }}>
+        <Link href="/" className="btn btn-2">
           ← Reservas
         </Link>
       </div>
@@ -58,9 +58,7 @@ export default async function ContaPage({
           </button>
         </form>
         {msg && (
-          <p className={msg.ok ? "" : "error"} style={msg.ok ? { color: "#4ade80" } : undefined}>
-            {msg.text}
-          </p>
+          <p className={msg.ok ? "ok" : "error"}>{msg.text}</p>
         )}
       </section>
     </main>
