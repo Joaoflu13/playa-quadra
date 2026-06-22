@@ -41,6 +41,8 @@ model Apartment {
   role         Role       @default(RESIDENT)
   status       AptStatus  @default(ACTIVE)
   blockedUntil DateTime?  // bloqueio temporário por falta (no-show)
+  // Primeiro acesso: nasce true; força troca de senha antes de usar o app.
+  mustChangePassword Boolean @default(true)
   createdAt    DateTime   @default(now())
   bookings     Booking[]
   penalties    Penalty[]

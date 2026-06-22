@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
+import { prisma } from "@/lib/db";
 import BookingBoard from "@/components/BookingBoard";
 import CourtPhoto from "@/components/CourtPhoto";
 import NotificationsBell from "@/components/NotificationsBell";
@@ -8,6 +9,13 @@ import NotificationsBell from "@/components/NotificationsBell";
 export default async function HomePage() {
   const session = await auth();
   if (!session?.user) redirect("/login");
+
+  // Primeiro acesso (ou após reset do síndico): força troca de senha.
+  const me = await prisma.apartment.findUnique({
+    where: { id: session.user.aptId as string },
+    select: { mustChangePassword: true },
+  });
+  if (me?.mustChangePassword) redirect("/trocar-senha");
 
   async function logout() {
     "use server";

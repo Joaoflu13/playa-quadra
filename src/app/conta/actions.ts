@@ -28,7 +28,10 @@ export async function changePassword(form: FormData) {
   if (!ok) redirect("/conta?status=wrong");
 
   const passwordHash = await bcrypt.hash(next, 10);
-  await prisma.apartment.update({ where: { id: aptId }, data: { passwordHash } });
+  await prisma.apartment.update({
+    where: { id: aptId },
+    data: { passwordHash, mustChangePassword: false },
+  });
 
   redirect("/conta?status=ok");
 }

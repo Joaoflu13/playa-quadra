@@ -43,7 +43,15 @@ async function main() {
     await prisma.apartment.upsert({
       where: { cpf },
       update: {},
-      create: { cpf, label: p.label, unit: p.unit, email, passwordHash: hash, role: p.role },
+      create: {
+        cpf,
+        label: p.label,
+        unit: p.unit,
+        email,
+        passwordHash: hash,
+        role: p.role,
+        mustChangePassword: false, // contas de demo já têm senha definida
+      },
     });
     console.log(`  ${p.role.padEnd(8)} CPF ${cpf}  ${p.label}`);
   }

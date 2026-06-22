@@ -24,7 +24,10 @@ export async function doReset(form: FormData) {
 
   const passwordHash = await bcrypt.hash(next, 10);
   await prisma.$transaction([
-    prisma.apartment.update({ where: { id: row.aptId }, data: { passwordHash } }),
+    prisma.apartment.update({
+      where: { id: row.aptId },
+      data: { passwordHash, mustChangePassword: false },
+    }),
     prisma.passwordResetToken.deleteMany({ where: { aptId: row.aptId } }),
   ]);
 

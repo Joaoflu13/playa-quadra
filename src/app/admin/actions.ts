@@ -104,7 +104,11 @@ export async function resetPassword(aptId: string, form: FormData) {
   const pwd = String(form.get("newPassword") ?? "").trim();
   if (pwd.length < 6) return;
   const passwordHash = await bcrypt.hash(pwd, 10);
-  await prisma.apartment.update({ where: { id: aptId }, data: { passwordHash } });
+  // Reset do síndico = senha provisória; força o morador a trocar no próximo acesso.
+  await prisma.apartment.update({
+    where: { id: aptId },
+    data: { passwordHash, mustChangePassword: true },
+  });
   revalidatePath("/admin");
 }
 
