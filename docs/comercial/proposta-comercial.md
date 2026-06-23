@@ -35,42 +35,58 @@ da quadra pelo celular, com regras automáticas. **Já está em produção** em
 - Cadastro de moradores **individual ou em massa (CSV)**; suspender/reativar; reset de senha.
 - **Zero infraestrutura para o condomínio:** roda 100% na nuvem, sem servidor, sem instalação.
 
-## 3. Planos e preços
+## 3. Investimento
 
-> Condomínio com **200+ unidades**. No rateio, todos os planos custam **centavos por
-> apartamento/mês** — menos que um cafezinho por morador no ano inteiro.
+> Condomínio com **154 apartamentos** (bloco único). No rateio, o custo fica em
+> **~R$ 1,62 por apartamento/mês** — cerca de R$ 19 por apê no ano inteiro.
 
-| Plano | Valor | Custo por unidade/mês* | Observação |
-|---|---|---|---|
-| **A — Mensalidade fixa** ⭐ | **R$ 297/mês** | **~R$ 1,30** | Recomendado. Simples de aprovar. |
-| **B — Por unidade** | R$ 1,90/unidade/mês | R$ 1,90 | Escala com novas áreas. |
-| **C — Setup + manutenção** | R$ 2.500 (única) + R$ 197/mês | ~R$ 0,85 | Menor mensalidade. |
+| Item | Valor |
+|---|---|
+| **Mensalidade — Quadra de Tênis** | **R$ 249/mês** (~R$ 1,62/apê) |
+| Plano anual (à vista, ~10% de desconto) | **R$ 2.690/ano** |
+| Nova área comum (add-on) | **+R$ 100/mês** cada |
+| Hospedagem, implantação e cadastro dos moradores | **inclusos** |
 
-\* Base de cálculo: 220 unidades.
+**Tudo de manutenção incluso:** hospedagem, correção de erros, atualizações de segurança,
+ajuste das regras, cadastro/suporte ao síndico. (Detalhe no Anexo de Escopo.)
 
-**Oferta de fechamento:**
-- ✅ **Piloto de 30 dias grátis**, sem compromisso.
-- ✅ **Plano anual:** pague 10 meses, use 12 → **R$ 2.970/ano** (economia de R$ 594).
-- ✅ Implantação e cadastro dos moradores **inclusos**.
+**Risco zero para começar:** **sem fidelidade nos primeiros 30 dias** — se não gostar,
+cancela sem multa.
 
-## 4. Roadmap (crescer junto com o condomínio)
+## 4. Comparação com o Condomob
+
+O Condomob é uma **suíte completa** de gestão (boleto, financeiro, assembleia + reserva de
+áreas), com preço **sob consulta** e a reserva embutida num pacote maior — muitas vezes
+contratada via administradora.
+
+| | **Condomob** | **Este sistema** |
+|---|---|---|
+| Foco | Suíte completa (reserva é um módulo) | **Dedicado à quadra/áreas** |
+| Preço estimado (154 un.) | ~R$ 350–500/mês* | **R$ 249/mês** (transparente) |
+| Contratação | Frequentemente via administradora | **Direto com o síndico** |
+| Implantação | Processo da plataforma | **Já no ar, em dias** |
+| Auto-cadastro + lista de espera | Genérico | **Sob medida** |
+
+\* Estimativa (Condomob não publica preço). Para reserva de quadra, este sistema entrega o
+essencial por **cerca de metade do custo** e com preço **transparente**.
+
+## 5. Roadmap (crescer junto com o condomínio)
 
 Mesmo sistema, novas áreas comuns por **+R$ 100/mês cada**:
 - Churrasqueira / espaço gourmet
 - Salão de festas
 - Outras quadras / academia / espaço pet
 
-## 5. Por que agora
+## 6. Por que agora
 
 - Produto **pronto e em produção** — implantação em dias, não meses.
-- Preço **abaixo** dos apps de condomínio do mercado (R$ 1,50–4,00/unidade).
+- **Mais barato e mais focado** que adotar uma suíte completa só pela reserva.
 - Melhora a convivência e **valoriza a gestão do síndico** perante os moradores.
 
-## 6. Próximos passos
+## 7. Próximos passos
 
-1. Aprovar o **piloto gratuito de 30 dias**.
-2. Enviar a lista de moradores (planilha) para cadastro.
-3. Comunicado aos moradores + tutorial de 1 página.
-4. Ao fim do piloto: contratar o plano escolhido.
+1. Aprovar a contratação (sem fidelidade nos primeiros 30 dias).
+2. Enviar a lista de moradores (planilha) para pré-autorização.
+3. Comunicado aos moradores + tutorial de 1 página (os moradores se cadastram sozinhos).
 
 **Contato:** [seu nome] · [telefone/e-mail]
