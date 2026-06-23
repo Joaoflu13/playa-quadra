@@ -7,8 +7,8 @@
 type Bucket = { fails: number; firstAt: number; lockedUntil?: number };
 
 const WINDOW_MS = 10 * 60_000; // janela de contagem: 10 min
-const MAX_FAILS = 5; // tentativas erradas antes de bloquear
-const LOCK_MS = 15 * 60_000; // bloqueio após estourar: 15 min
+const MAX_FAILS = 8; // tentativas erradas antes de bloquear
+const LOCK_MS = 2 * 60_000; // bloqueio após estourar: 2 min
 
 const buckets = new Map<string, Bucket>();
 

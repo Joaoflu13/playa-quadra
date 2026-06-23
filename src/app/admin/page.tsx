@@ -3,6 +3,7 @@ import { requireAdmin } from "@/lib/admin";
 import { prisma } from "@/lib/db";
 import { getConfig } from "@/lib/rules";
 import { formatCpf } from "@/lib/cpf";
+import ResetPasswordField from "@/components/ResetPasswordField";
 import {
   updateRules,
   createApartment,
@@ -388,14 +389,8 @@ export default async function AdminPage() {
                   )}
                 </div>
                 {a.role !== "ADMIN" && (
-                  <form
-                    action={resetPassword.bind(null, a.id)}
-                    style={{ display: "flex", gap: 8, marginTop: 8, maxWidth: 360 }}
-                  >
-                    <input name="newPassword" placeholder="nova senha provisória" minLength={6} />
-                    <button className="btn btn-2" type="submit" style={{ whiteSpace: "nowrap" }}>
-                      Redefinir senha
-                    </button>
+                  <form action={resetPassword.bind(null, a.id)}>
+                    <ResetPasswordField />
                   </form>
                 )}
               </li>
