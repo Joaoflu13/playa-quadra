@@ -8,12 +8,12 @@ import { isLocked } from "@/lib/rateLimit";
 export default async function LoginPage({
   searchParams,
 }: {
-  searchParams: Promise<{ error?: string; reset?: string }>;
+  searchParams: Promise<{ error?: string; reset?: string; activated?: string }>;
 }) {
   const session = await auth();
   if (session?.user) redirect("/");
 
-  const { error, reset } = await searchParams;
+  const { error, reset, activated } = await searchParams;
 
   async function login(formData: FormData) {
     "use server";
@@ -84,7 +84,11 @@ export default async function LoginPage({
               error && <p className="error">CPF ou senha inválidos.</p>
             )}
             {reset && <p className="ok">Senha alterada! Entre com a nova senha.</p>}
-            <p style={{ marginTop: 12, marginBottom: 0, textAlign: "center" }}>
+            {activated && <p className="ok">Conta ativada! Entre com sua nova senha.</p>}
+            <p style={{ marginTop: 12, marginBottom: 4, textAlign: "center" }}>
+              <Link href="/ativar">Primeiro acesso? Ative sua conta</Link>
+            </p>
+            <p style={{ marginTop: 0, marginBottom: 0, textAlign: "center" }}>
               <Link href="/esqueci">Esqueci minha senha</Link>
             </p>
           </form>

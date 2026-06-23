@@ -329,9 +329,14 @@ export default async function AdminPage() {
               resize: "vertical",
             }}
           />
-          <div style={{ marginTop: 12, maxWidth: 280 }}>
-            <label htmlFor="defaultPassword">Senha provisória (para todos)</label>
-            <input id="defaultPassword" name="defaultPassword" required minLength={6} defaultValue="playa123" />
+          <div style={{ marginTop: 12, maxWidth: 320 }}>
+            <label htmlFor="defaultPassword">Senha provisória (opcional)</label>
+            <input id="defaultPassword" name="defaultPassword" minLength={6} placeholder="deixe em branco para pré-autorizar" />
+            <p className="muted" style={{ marginTop: 6 }}>
+              <strong>Em branco</strong> = só pré-autoriza os CPFs; cada morador cria a
+              própria senha em <code>/ativar</code> (recomendado). Com senha = contas já
+              entram com essa senha provisória.
+            </p>
           </div>
           <button className="btn" type="submit" style={{ marginTop: 12 }}>
             Importar lista
