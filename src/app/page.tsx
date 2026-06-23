@@ -2,8 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import BookingBoard from "@/components/BookingBoard";
-import CourtPhoto from "@/components/CourtPhoto";
+import CourtReveal from "@/components/CourtReveal";
 import NotificationsBell from "@/components/NotificationsBell";
 
 export default async function HomePage() {
@@ -25,10 +24,7 @@ export default async function HomePage() {
   return (
     <main className="home-bg">
       <div className="container">
-      <div style={{ marginBottom: 16 }}>
-        <CourtPhoto />
-      </div>
-      <div className="row" style={{ marginBottom: 20, flexWrap: "wrap" }}>
+      <div className="row" style={{ marginBottom: 16, flexWrap: "wrap" }}>
         <span className="muted">
           Olá, <strong style={{ color: "var(--text)" }}>{session.user.name}</strong>
         </span>
@@ -49,7 +45,7 @@ export default async function HomePage() {
           </form>
         </div>
       </div>
-      <BookingBoard />
+      <CourtReveal />
       </div>
     </main>
   );
