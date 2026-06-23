@@ -22,25 +22,29 @@ Deixe ele reclamar. O problema dele vende o produto.
    "Quem não aparece, fica de fora alguns dias. Isso se resolve sozinho."
 
 ## A âncora de preço (o momento-chave)
-> "São R$ 297 por mês para o condomínio inteiro. Com [X] apartamentos, dá **menos de
-> R$ 1,50 por unidade por mês** — menos que um cafezinho no ano todo por morador.
-> E os 30 primeiros dias são **grátis**, sem compromisso."
+> "São R$ 385 por mês para o condomínio inteiro — **R$ 2,50 por apartamento**, cerca de
+> R$ 30 por morador no ano todo.
+> E para começar sem risco: **sem fidelidade nos primeiros 30 dias** — se não gostar,
+> cancela sem multa."
 
 ## Quebra de objeções
-- **"Está caro / não tem verba."** → "Por unidade é R$1,30/mês. E o piloto é grátis —
+- **"Está caro / não tem verba."** → "Por apê é R$2,50/mês. E sem fidelidade nos 30 dias —
   o senhor só decide depois de ver funcionando."
 - **"Já temos grupo de WhatsApp."** → "E funciona para garantir horário e cobrar falta?
   Aqui ninguém marca em cima do outro e quem falta é bloqueado automaticamente."
-- **"Preciso aprovar em assembleia."** → "Perfeito. Levo a proposta pronta e o piloto
-  gratuito já mostra resultado antes da assembleia decidir." (rateio facilita aprovação)
+- **"Já temos Condomob."** → "Ótimo. Lá a reserva é um módulo dentro de uma suíte cara,
+  via administradora. Aqui é dedicado à quadra: lista de espera, regras de falta, grade ao
+  vivo — e o senhor controla, sem depender da administradora."
+- **"Preciso aprovar em assembleia."** → "Perfeito. Levo a proposta pronta; como não tem
+  fidelidade nos 30 dias, dá pra mostrar funcionando antes da assembleia decidir." (rateio facilita)
 - **"E se der problema técnico?"** → "Está no ar há meses, roda na mesma nuvem de grandes
   empresas (Vercel/Supabase), sem nada para instalar no condomínio."
 - **"E a LGPD / dados dos moradores?"** → "O nome de quem reservou só aparece para o dono
   da reserva e para o senhor. Senha individual e criptografada."
 
 ## Fechamento (peça o sim pequeno)
-> "Posso começar o piloto de 30 dias essa semana? Só preciso da lista de moradores em
-> planilha que eu já deixo todo mundo cadastrado."
+> "Posso começar essa semana? Sem fidelidade nos primeiros 30 dias. Só preciso da lista
+> de moradores em planilha que eu já deixo tudo pronto para eles ativarem."
 
 ## Upsell (depois do sim)
 > "Esse mesmo sistema serve para a churrasqueira e o salão de festas — a gente adiciona
