@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AuthError } from "next-auth";
 import { auth, signIn } from "@/lib/auth";
+import { onlyDigits } from "@/lib/cpf";
+import { isLocked } from "@/lib/rateLimit";
 
 export default async function LoginPage({
   searchParams,
@@ -15,6 +17,12 @@ export default async function LoginPage({
 
   async function login(formData: FormData) {
     "use server";
+    const cpfDigits = onlyDigits(String(formData.get("cpf") ?? ""));
+    // Anti força-bruta: se o CPF está bloqueado, avisa em vez de dizer
+    // genericamente "senha inválida" (foi o que mais confundiu no uso real).
+    if (cpfDigits && isLocked(cpfDigits)) {
+      redirect("/login?error=locked");
+    }
     try {
       await signIn("credentials", {
         cpf: formData.get("cpf"),
@@ -23,6 +31,8 @@ export default async function LoginPage({
       });
     } catch (e) {
       if (e instanceof AuthError) {
+        // Esta tentativa pode ter sido a que estourou o limite.
+        if (cpfDigits && isLocked(cpfDigits)) redirect("/login?error=locked");
         redirect("/login?error=1");
       }
       throw e; // redirect() lança internamente; deixe propagar.
@@ -66,7 +76,13 @@ export default async function LoginPage({
         <button className="btn" type="submit" style={{ width: "100%" }}>
           Entrar
         </button>
-            {error && <p className="error">CPF ou senha inválidos.</p>}
+            {error === "locked" ? (
+              <p className="error">
+                Muitas tentativas de login. Aguarde alguns minutos e tente de novo.
+              </p>
+            ) : (
+              error && <p className="error">CPF ou senha inválidos.</p>
+            )}
             {reset && <p className="ok">Senha alterada! Entre com a nova senha.</p>}
             <p style={{ marginTop: 12, marginBottom: 0, textAlign: "center" }}>
               <Link href="/esqueci">Esqueci minha senha</Link>
