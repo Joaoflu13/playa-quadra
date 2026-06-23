@@ -5,9 +5,15 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { onlyDigits, isValidCpf } from "@/lib/cpf";
 
-/** Normaliza unidade para comparação tolerante (espaços/maiúsculas). */
+/**
+ * Normaliza unidade para comparação tolerante: ignora maiúsculas, acentos,
+ * espaços e pontuação. "Bloco A - 304" == "bloco a 304" == "BlocoA304".
+ */
 function norm(s: string): string {
-  return s.trim().toLowerCase().replace(/\s+/g, " ");
+  return (s ?? "")
+    .normalize("NFD") // separa acentos (ã -> a + diacrítico)
+    .toLowerCase()
+    .replace(/[^a-z0-9]/g, ""); // mantém só letras/números (tira acento, espaço, pontuação)
 }
 
 /**
