@@ -22,13 +22,13 @@ Deixe ele reclamar. O problema dele vende o produto.
    "Quem não aparece, fica de fora alguns dias. Isso se resolve sozinho."
 
 ## A âncora de preço (o momento-chave)
-> "São R$ 249 por mês para o condomínio inteiro. Com 154 apartamentos, dá **menos de
-> R$ 1,62 por apê por mês** — cerca de R$ 19 por morador no ano todo.
+> "São R$ 385 por mês para o condomínio inteiro — **R$ 2,50 por apartamento**, cerca de
+> R$ 30 por morador no ano todo.
 > E para começar sem risco: **sem fidelidade nos primeiros 30 dias** — se não gostar,
 > cancela sem multa."
 
 ## Quebra de objeções
-- **"Está caro / não tem verba."** → "Por apê é R$1,62/mês. E sem fidelidade nos 30 dias —
+- **"Está caro / não tem verba."** → "Por apê é R$2,50/mês. E sem fidelidade nos 30 dias —
   o senhor só decide depois de ver funcionando."
 - **"Já temos grupo de WhatsApp."** → "E funciona para garantir horário e cobrar falta?
   Aqui ninguém marca em cima do outro e quem falta é bloqueado automaticamente."

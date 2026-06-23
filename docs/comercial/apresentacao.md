@@ -58,23 +58,23 @@ Deixe ele reclamar — o problema dele vende a solução. (WhatsApp, caderninho,
 **Mostrar:**
 | Item | Valor |
 |---|---|
-| Mensalidade (quadra) | **R$ 249/mês** |
-| Custo por apartamento | **~R$ 1,62/apê/mês** |
-| Anual à vista | R$ 2.690/ano |
+| Mensalidade (quadra) | **R$ 385/mês** |
+| Custo por apartamento | **R$ 2,50/apê/mês** |
+| Anual à vista | R$ 4.158/ano |
 
 **Falar (a âncora):**
-> "São R$ 249 por mês para o condomínio inteiro. Com 154 apartamentos, dá **menos de
-> R$ 1,62 por apê** — cerca de R$ 19 por morador no ano todo. Tudo de manutenção e
-> hospedagem incluso."
+> "São R$ 385 por mês para o condomínio inteiro — **R$ 2,50 por apartamento**, cerca de
+> R$ 30 por morador no ano todo. Tudo de manutenção e hospedagem incluso, sem cobrança
+> separada de servidor."
 
 ---
 
 ## Slide 7 — Por que não o Condomob (comparação)
 **Falar:**
 > "O Condomob é uma suíte de gestão inteira; a reserva é só um pedaço dentro de um pacote
-> que custa, estimado, R$ 350–500/mês e costuma vir pela administradora. Aqui o senhor
-> tem um sistema **dedicado à quadra**, com lista de espera e auto-cadastro, por **cerca
-> de metade** e com preço transparente."
+> que custa, estimado, R$ 350–500/mês e costuma vir pela administradora. Aqui, por um
+> valor **na faixa baixa do mercado e transparente**, o senhor tem um sistema **dedicado
+> à quadra**, com lista de espera e auto-cadastro — e controla tudo, sem a administradora."
 
 > Se ele disser "já temos Condomob": "Ótimo — aqui o foco é a quadra: lista de espera,
 > regras de falta, grade ao vivo. E não depende da administradora; o senhor controla."
@@ -103,7 +103,7 @@ Deixe ele reclamar — o problema dele vende a solução. (WhatsApp, caderninho,
 ---
 
 ## Quebra de objeções (cola rápida)
-- **"Está caro."** → "R$ 1,62 por apê/mês. Menos que um cafezinho por morador no ano."
+- **"Está caro."** → "R$ 2,50 por apê/mês — cerca de R$ 30 por morador no ano inteiro."
 - **"Já temos grupo no WhatsApp."** → "E garante horário e cobra falta? Aqui ninguém
   marca em cima do outro e quem falta é bloqueado sozinho."
 - **"Já temos Condomob."** → Slide 7 (foco, lista de espera, independência da administradora).
@@ -118,4 +118,4 @@ Deixe ele reclamar — o problema dele vende a solução. (WhatsApp, caderninho,
 - [ ] App aberto no celular, logado como morador **e** como síndico.
 - [ ] Grade com 2–3 reservas de exemplo (para mostrar ocupado/lista de espera).
 - [ ] Proposta (`proposta-comercial.md`) impressa/PDF na mão.
-- [ ] Saber de cabeça: **R$ 249/mês · 154 apês · ~R$ 1,62/apê**.
+- [ ] Saber de cabeça: **R$ 385/mês · 154 apês · R$ 2,50/apê**.

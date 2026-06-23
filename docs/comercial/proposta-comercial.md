@@ -37,13 +37,13 @@ da quadra pelo celular, com regras automáticas. **Já está em produção** em
 
 ## 3. Investimento
 
-> Condomínio com **154 apartamentos** (bloco único). No rateio, o custo fica em
-> **~R$ 1,62 por apartamento/mês** — cerca de R$ 19 por apê no ano inteiro.
+> Condomínio com **154 apartamentos** (bloco único). O custo é de **R$ 2,50 por
+> apartamento/mês** — cerca de R$ 30 por apê no ano inteiro.
 
 | Item | Valor |
 |---|---|
-| **Mensalidade — Quadra de Tênis** | **R$ 249/mês** (~R$ 1,62/apê) |
-| Plano anual (à vista, ~10% de desconto) | **R$ 2.690/ano** |
+| **Mensalidade — Quadra de Tênis** | **R$ 385/mês** (R$ 2,50/apê) |
+| Plano anual (à vista, ~10% de desconto) | **R$ 4.158/ano** |
 | Nova área comum (add-on) | **+R$ 100/mês** cada |
 | Hospedagem, implantação e cadastro dos moradores | **inclusos** |
 
@@ -62,13 +62,14 @@ contratada via administradora.
 | | **Condomob** | **Este sistema** |
 |---|---|---|
 | Foco | Suíte completa (reserva é um módulo) | **Dedicado à quadra/áreas** |
-| Preço estimado (154 un.) | ~R$ 350–500/mês* | **R$ 249/mês** (transparente) |
+| Preço estimado (154 un.) | ~R$ 350–500/mês* | **R$ 385/mês** (transparente) |
 | Contratação | Frequentemente via administradora | **Direto com o síndico** |
 | Implantação | Processo da plataforma | **Já no ar, em dias** |
 | Auto-cadastro + lista de espera | Genérico | **Sob medida** |
 
-\* Estimativa (Condomob não publica preço). Para reserva de quadra, este sistema entrega o
-essencial por **cerca de metade do custo** e com preço **transparente**.
+\* Estimativa (Condomob não publica preço). Com preço **na faixa baixa do mercado** e
+**transparente**, este sistema entrega o que importa para a quadra: foco total, lista de
+espera, auto-cadastro e independência da administradora.
 
 ## 5. Roadmap (crescer junto com o condomínio)
 

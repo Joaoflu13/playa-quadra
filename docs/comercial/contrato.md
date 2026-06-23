@@ -81,15 +81,15 @@ indisponibilidades causadas por terceiros (provedores de hospedagem/banco) ou fo
 com aviso prévio.
 
 ## Cláusula 5 — Preço, reajuste e pagamento
-5.1. **Mensalidade de manutenção (quadra de tênis):** **R$ 249,00/mês**, cobrindo a
-Cláusula 2.
+5.1. **Mensalidade de manutenção (quadra de tênis):** **R$ 385,00/mês** (equivalente a
+R$ 2,50 por apartamento, base de 154 unidades), cobrindo a Cláusula 2.
 
 5.2. **Add-on por nova área comum:** **R$ 100,00/mês** por área, quando contratada.
 
 5.3. **Evolução (Cláusula 3):** **R$ 150,00/hora**, mediante orçamento prévio aprovado.
 
-5.4. **Plano anual (opcional):** **R$ 2.690,00/ano**, pago à vista, em substituição à
-mensalidade do período.
+5.4. **Plano anual (opcional):** **R$ 4.158,00/ano**, pago à vista (~10% de desconto), em
+substituição à mensalidade do período.
 
 5.5. **Vencimento:** todo dia [10] de cada mês, via [PIX/transferência/boleto].
 
