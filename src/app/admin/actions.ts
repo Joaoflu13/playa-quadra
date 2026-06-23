@@ -1,5 +1,6 @@
 "use server";
 
+import { randomBytes } from "crypto";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
@@ -81,7 +82,8 @@ export async function createApartment(form: FormData) {
 
   const passwordHash = await bcrypt.hash(password, 10);
   await prisma.apartment.create({
-    data: { cpf, label, unit, email, passwordHash, role: "RESIDENT" },
+    // Criada pelo síndico já com senha => conta ativada (não pode ser ativada por terceiros).
+    data: { cpf, label, unit, email, passwordHash, role: "RESIDENT", activatedAt: new Date() },
   });
   revalidatePath("/admin");
 }
@@ -96,9 +98,12 @@ export async function importResidents(form: FormData) {
   await requireAdmin();
   const raw = String(form.get("csv") ?? "");
   const defaultPassword = String(form.get("defaultPassword") ?? "").trim();
-  if (defaultPassword.length < 6) return;
 
-  const passwordHash = await bcrypt.hash(defaultPassword, 10);
+  // Senha em branco = PRÉ-AUTORIZAR: cria contas sem senha utilizável; o morador
+  // ativa depois em /ativar (auto-cadastro). Com senha = cria contas já ativadas.
+  const preauthorize = defaultPassword.length === 0;
+  if (!preauthorize && defaultPassword.length < 6) return;
+
   const lines = raw.split(/\r?\n/).map((l) => l.trim()).filter(Boolean);
 
   for (const line of lines) {
@@ -114,8 +119,22 @@ export async function importResidents(form: FormData) {
     });
     if (exists) continue;
 
+    // Pré-autorizadas recebem uma senha aleatória inutilizável (login bloqueado
+    // até o morador ativar). As com senha do síndico nascem ativadas.
+    const passwordHash = await bcrypt.hash(
+      preauthorize ? randomBytes(24).toString("hex") : defaultPassword,
+      10
+    );
     await prisma.apartment.create({
-      data: { cpf, label, unit, email, passwordHash, role: "RESIDENT" },
+      data: {
+        cpf,
+        label,
+        unit,
+        email,
+        passwordHash,
+        role: "RESIDENT",
+        activatedAt: preauthorize ? null : new Date(),
+      },
     });
   }
   revalidatePath("/admin");
