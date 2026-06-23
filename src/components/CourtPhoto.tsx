@@ -24,7 +24,6 @@ export default function CourtPhoto({ hint }: { hint?: string }) {
       )}
       <div className="hero-overlay">
         <span className="eyebrow">Playa del Mago · Barra da Tijuca</span>
-        <span className="title">Quadra de Tênis</span>
         {hint && <span className="hero-hint">{hint}</span>}
         {failed && (
           <span style={{ fontSize: 12, opacity: 0.9, marginTop: 4 }}>
