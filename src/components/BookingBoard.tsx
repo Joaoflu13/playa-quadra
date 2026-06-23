@@ -16,6 +16,8 @@ type Slot = {
   interestCount?: number;
   interested?: string[];
   iAmInterested?: boolean;
+  waitlistCount?: number;
+  iAmWaiting?: boolean;
 };
 
 type MyBooking = { id: string; startAt: string; endAt: string };
@@ -152,6 +154,8 @@ export default function BookingBoard() {
     api("/api/bookings", "PATCH", { id, openForPlayers }, id);
   const setInterest = (bookingId: string, want: boolean) =>
     api("/api/bookings/interest", want ? "POST" : "DELETE", { bookingId }, bookingId);
+  const setWaitlist = (startAt: string, want: boolean) =>
+    api("/api/bookings/waitlist", want ? "POST" : "DELETE", { startAt }, `wl-${startAt}`);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -243,6 +247,7 @@ export default function BookingBoard() {
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
                       {s.ownerLabel ? shortLabel(s.ownerLabel) : "ocupado"}
                       {s.openForPlayers ? " · 🎾 vaga" : ""}
+                      {s.iAmWaiting ? " · na fila" : ""}
                     </div>
                   </button>
                 );
@@ -397,6 +402,41 @@ export default function BookingBoard() {
 
           {!selectedSlot.mine && !selectedSlot.openForPlayers && (
             <p className="muted">Horário fechado para parceiros.</p>
+          )}
+
+          {/* Lista de espera: qualquer morador (que não seja o dono) pode entrar. */}
+          {!selectedSlot.mine && (
+            <div
+              style={{
+                marginTop: 12,
+                borderTop: "1px solid var(--border)",
+                paddingTop: 12,
+              }}
+            >
+              <p className="muted" style={{ marginTop: 0 }}>
+                Quer este horário? Entre na lista de espera: se o dono cancelar, você é
+                avisado e o primeiro a reservar leva a vaga.
+              </p>
+              <button
+                className="btn btn-2"
+                disabled={busy === `wl-${selectedSlot.startAt}`}
+                onClick={() =>
+                  setWaitlist(selectedSlot.startAt, !selectedSlot.iAmWaiting)
+                }
+              >
+                {busy === `wl-${selectedSlot.startAt}`
+                  ? "..."
+                  : selectedSlot.iAmWaiting
+                    ? "Sair da lista de espera"
+                    : "Entrar na lista de espera"}
+              </button>
+              {(selectedSlot.waitlistCount ?? 0) > 0 && (
+                <p className="muted" style={{ marginTop: 8 }}>
+                  {selectedSlot.waitlistCount} na fila
+                  {selectedSlot.iAmWaiting ? " (incluindo você)" : ""}.
+                </p>
+              )}
+            </div>
           )}
         </section>
       )}

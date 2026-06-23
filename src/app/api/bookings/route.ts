@@ -239,6 +239,34 @@ export async function DELETE(req: NextRequest) {
   }
 
   await prisma.booking.update({ where: { id }, data: { status: "CANCELLED" } });
+
+  // Lista de espera: avisa todos que aguardavam este horário e limpa a fila
+  // (a vaga vira uma corrida — o primeiro a reservar leva).
+  const waiters = await prisma.waitlist.findMany({
+    where: { courtId: booking.courtId, startAt: booking.startAt },
+    select: { aptId: true },
+  });
+  if (waiters.length > 0) {
+    const quando = new Intl.DateTimeFormat("pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      weekday: "short",
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(booking.startAt);
+    await prisma.notification.createMany({
+      data: waiters.map((w) => ({
+        aptId: w.aptId,
+        type: "WAITLIST_OPEN",
+        message: `A vaga da quadra de ${quando} liberou! Entre no app e reserve antes que acabe.`,
+      })),
+    });
+    await prisma.waitlist.deleteMany({
+      where: { courtId: booking.courtId, startAt: booking.startAt },
+    });
+  }
+
   return NextResponse.json({ ok: true });
 }
 

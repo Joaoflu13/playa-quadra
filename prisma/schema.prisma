@@ -50,6 +50,24 @@ model Apartment {
   notifications Notification[]
   resetTokens  PasswordResetToken[]
   recurrings   RecurringBooking[]
+  waitlist     Waitlist[]
+}
+
+/// Lista de espera de um horário ocupado. É ancorada ao SLOT (courtId+startAt),
+/// não à reserva, para sobreviver ao cancelamento. Quando o dono cancela, todos
+/// os moradores da fila são avisados (notificação) e o primeiro a reservar leva.
+model Waitlist {
+  id        String    @id @default(cuid())
+  courtId   String
+  startAt   DateTime
+  aptId     String
+  apartment Apartment @relation(fields: [aptId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  // Um morador só entra uma vez na fila do mesmo slot.
+  @@unique([courtId, startAt, aptId])
+  @@index([courtId, startAt])
+  @@index([aptId])
 }
 
 /// Token de redefinição de senha (esqueci minha senha). Expira em ~1h.

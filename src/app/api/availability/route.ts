@@ -50,6 +50,20 @@ export async function GET(req: NextRequest) {
   });
   const byStart = new Map(booked.map((b) => [b.startAt.getTime(), b]));
 
+  // Lista de espera do dia, agregada por horário (contagem + se o viewer está nela).
+  const waits = await prisma.waitlist.findMany({
+    where: { courtId: COURT_ID, startAt: { gte: dayStart, lt: dayEnd } },
+    select: { startAt: true, aptId: true },
+  });
+  const waitByStart = new Map<number, { count: number; mine: boolean }>();
+  for (const w of waits) {
+    const k = w.startAt.getTime();
+    const cur = waitByStart.get(k) ?? { count: 0, mine: false };
+    cur.count += 1;
+    if (w.aptId === viewerAptId) cur.mine = true;
+    waitByStart.set(k, cur);
+  }
+
   // Bloqueios da quadra que tocam o dia (manutenção, torneio, etc.).
   const blocks = await prisma.courtBlock.findMany({
     where: { courtId: COURT_ID, startAt: { lt: dayEnd }, endAt: { gt: dayStart } },
@@ -104,6 +118,8 @@ export async function GET(req: NextRequest) {
           ? b.interests.map((i) => withUnit(i.apartment.label, i.apartment.unit))
           : [],
       iAmInterested: !!viewerAptId && b.interests.some((i) => i.aptId === viewerAptId),
+      waitlistCount: waitByStart.get(start.getTime())?.count ?? 0,
+      iAmWaiting: waitByStart.get(start.getTime())?.mine ?? false,
     };
   });
 
