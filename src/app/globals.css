@@ -239,6 +239,18 @@ label {
   font-weight: 800;
   letter-spacing: -0.02em;
 }
+/* Chamada de ação ("Toque para ver os horários") no rodapé do hero. */
+.hero-hint {
+  margin-top: 8px;
+  align-self: flex-start;
+  font-size: 13px;
+  font-weight: 600;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.35);
+  backdrop-filter: blur(2px);
+}
 
 /* === Fundo da página logada (foto do condomínio, bem suave) === */
 .home-bg {
@@ -246,7 +258,7 @@ label {
   background-image: linear-gradient(rgba(231, 241, 251, 0.28), rgba(234, 243, 238, 0.36)),
     url("/condominio.jpg");
   background-size: cover;
-  background-position: center;
+  background-position: left center;
   background-attachment: fixed;
 }
 
