@@ -43,8 +43,8 @@ export default async function LoginPage({
     <main className="login-split">
       <div className="login-split__photo">
         <div className="brand">
-          <div className="eyebrow">Playa del Mago · Barra da Tijuca</div>
-          <div className="name">Quadra de Tênis</div>
+          <div className="eyebrow">Barra da Tijuca</div>
+          <div className="name">Playa del Mago</div>
         </div>
       </div>
       <div className="login-split__form">
