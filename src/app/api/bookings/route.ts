@@ -182,6 +182,28 @@ export async function POST(req: NextRequest) {
       void sendBookingConfirmation(aptEmail, aptLabel, start, end).catch(() => {});
     }
 
+    // Reservou sozinho um horário que tinha "jogo aberto"? A procura cai e quem
+    // a abriu é avisado (o horário ficou livre pra todos — quem reservar leva).
+    const openMatch = await prisma.openMatch.findUnique({
+      where: { courtId_startAt: { courtId: COURT_ID, startAt: start } },
+    });
+    if (openMatch) {
+      await prisma.openMatch.delete({ where: { id: openMatch.id } }).catch(() => {});
+      if (openMatch.aptId !== aptId) {
+        const quando = new Intl.DateTimeFormat("pt-BR", {
+          timeZone: "America/Sao_Paulo",
+          weekday: "short", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit",
+        }).format(start);
+        await prisma.notification.create({
+          data: {
+            aptId: openMatch.aptId,
+            type: "MATCH_TAKEN",
+            message: `O horário de ${quando} que você procurava parceiro foi reservado por outro morador.`,
+          },
+        }).catch(() => {});
+      }
+    }
+
     return NextResponse.json(booking, { status: 201 });
   } catch (e) {
     // Slot tomado por outra unidade entre a checagem e o insert

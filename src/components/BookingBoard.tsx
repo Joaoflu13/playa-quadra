@@ -11,11 +11,12 @@ type Slot = {
   blockReason?: string | null;
   bookingId?: string;
   ownerLabel?: string | null;
+  partnerLabel?: string | null;
   mine?: boolean;
-  openForPlayers?: boolean;
-  interestCount?: number;
-  interested?: string[];
-  iAmInterested?: boolean;
+  iAmPartner?: boolean;
+  openMatch?: boolean;
+  openMatchBy?: string | null;
+  openMatchMine?: boolean;
   waitlistCount?: number;
   iAmWaiting?: boolean;
 };
@@ -150,10 +151,13 @@ export default function BookingBoard() {
       return;
     return api("/api/bookings", "DELETE", { id }, id);
   };
-  const toggleOpen = (id: string, openForPlayers: boolean) =>
-    api("/api/bookings", "PATCH", { id, openForPlayers }, id);
-  const setInterest = (bookingId: string, want: boolean) =>
-    api("/api/bookings/interest", want ? "POST" : "DELETE", { bookingId }, bookingId);
+  // Jogo aberto (procurar parceiro sem reservar o horário).
+  const openMatch = (startAt: string) =>
+    api("/api/bookings/match", "POST", { startAt, action: "open" }, `m-${startAt}`);
+  const cancelMatch = (startAt: string) =>
+    api("/api/bookings/match", "DELETE", { startAt }, `m-${startAt}`);
+  const joinMatch = (startAt: string) =>
+    api("/api/bookings/match", "POST", { startAt, action: "join" }, `j-${startAt}`);
   const setWaitlist = (startAt: string, want: boolean) =>
     api("/api/bookings/waitlist", want ? "POST" : "DELETE", { startAt }, `wl-${startAt}`);
 
@@ -230,7 +234,7 @@ export default function BookingBoard() {
                   >
                     {hhmm(s.startAt)}
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
-                      sua reserva {s.openForPlayers ? "· 🎾" : ""}
+                      sua reserva {s.partnerLabel ? "· dupla 🎾" : ""}
                     </div>
                   </button>
                 );
@@ -246,7 +250,7 @@ export default function BookingBoard() {
                     {hhmm(s.startAt)}
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
                       {s.ownerLabel ? shortLabel(s.ownerLabel) : "ocupado"}
-                      {s.openForPlayers ? " · 🎾 vaga" : ""}
+                      {s.partnerLabel ? " + " + shortLabel(s.partnerLabel) : ""}
                       {s.iAmWaiting ? " · na fila" : ""}
                     </div>
                   </button>
@@ -281,8 +285,8 @@ export default function BookingBoard() {
                   onClick={() => setSelected(s.startAt)}
                 >
                   {hhmm(s.startAt)}
-                  <div style={{ fontSize: 11, fontWeight: 400, color: "var(--muted)" }}>
-                    {busy === s.startAt ? "..." : "livre"}
+                  <div style={{ fontSize: 11, fontWeight: 400, color: s.openMatch ? "var(--accent-700)" : "var(--muted)" }}>
+                    {busy === s.startAt ? "..." : s.openMatch ? "🎾 quer dupla" : "livre"}
                   </div>
                 </button>
               );
@@ -292,12 +296,12 @@ export default function BookingBoard() {
         {error && <p className="error">{error}</p>}
       </section>
 
-      {/* Confirmação de reserva (slot livre selecionado) */}
+      {/* Slot livre selecionado: reservar, procurar parceiro ou entrar numa procura */}
       {selectedSlot && !selectedSlot.taken && selectedSlot.bookable && (
         <section className="card">
           <div className="row">
             <h2 style={{ marginTop: 0 }}>
-              Reservar {hhmm(selectedSlot.startAt)}–{hhmm(selectedSlot.endAt)}?
+              Horário {hhmm(selectedSlot.startAt)}–{hhmm(selectedSlot.endAt)}
             </h2>
             <button className="btn btn-2" onClick={() => setSelected(null)}>
               Fechar
@@ -305,19 +309,60 @@ export default function BookingBoard() {
           </div>
           <p className="muted">
             {prettyDate(date)} · das {hhmm(selectedSlot.startAt)} às {hhmm(selectedSlot.endAt)}.
-            Lembre-se: faltar sem cancelar gera bloqueio temporário.
+            Faltar sem cancelar gera bloqueio temporário.
           </p>
-          <button
-            className="btn"
-            disabled={busy === selectedSlot.startAt}
-            onClick={async () => {
-              const at = selectedSlot.startAt;
-              await book(at);
-              setSelected(null);
-            }}
-          >
-            {busy === selectedSlot.startAt ? "Reservando..." : "✅ Confirmar reserva"}
-          </button>
+
+          {/* Alguém já está procurando parceiro neste horário */}
+          {selectedSlot.openMatch && !selectedSlot.openMatchMine && (
+            <div style={{ marginBottom: 12, padding: "12px", background: "var(--surface-2)", borderRadius: 10 }}>
+              <p style={{ margin: "0 0 8px" }}>
+                🎾 <strong>{selectedSlot.openMatchBy}</strong> está procurando parceiro aqui.
+                Ao entrar, o horário é <strong>reservado para vocês dois</strong>.
+              </p>
+              <button
+                className="btn"
+                disabled={busy === `j-${selectedSlot.startAt}`}
+                onClick={async () => { await joinMatch(selectedSlot.startAt); setSelected(null); }}
+              >
+                {busy === `j-${selectedSlot.startAt}` ? "..." : "🙋 Eu quero (fechar a dupla)"}
+              </button>
+            </div>
+          )}
+
+          {/* Eu mesmo estou procurando parceiro neste horário */}
+          {selectedSlot.openMatchMine && (
+            <div style={{ marginBottom: 12 }}>
+              <p className="muted" style={{ marginTop: 0 }}>
+                Você está procurando parceiro aqui. O horário só fecha quando alguém entrar.
+              </p>
+              <button
+                className="btn btn-2"
+                disabled={busy === `m-${selectedSlot.startAt}`}
+                onClick={async () => { await cancelMatch(selectedSlot.startAt); setSelected(null); }}
+              >
+                {busy === `m-${selectedSlot.startAt}` ? "..." : "Cancelar procura de parceiro"}
+              </button>
+            </div>
+          )}
+
+          <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+            <button
+              className="btn"
+              disabled={busy === selectedSlot.startAt}
+              onClick={async () => { await book(selectedSlot.startAt); setSelected(null); }}
+            >
+              {busy === selectedSlot.startAt ? "Reservando..." : "✅ Reservar para mim"}
+            </button>
+            {!selectedSlot.openMatch && (
+              <button
+                className="btn btn-2"
+                disabled={busy === `m-${selectedSlot.startAt}`}
+                onClick={async () => { await openMatch(selectedSlot.startAt); setSelected(null); }}
+              >
+                {busy === `m-${selectedSlot.startAt}` ? "..." : "🎾 Procurar parceiro"}
+              </button>
+            )}
+          </div>
         </section>
       )}
 
@@ -337,75 +382,23 @@ export default function BookingBoard() {
               <>
                 Reservado por <strong>{selectedSlot.ownerLabel}</strong>
                 {selectedSlot.mine && " (você)"}
+                {selectedSlot.partnerLabel && (
+                  <>
+                    {" "}e <strong>{selectedSlot.partnerLabel}</strong>
+                    {selectedSlot.iAmPartner && " (você)"}
+                  </>
+                )}
               </>
             ) : (
               <>Horário <strong>ocupado</strong></>
             )}
           </p>
-
-          {/* Dono gerencia "procuro parceiros" */}
-          {selectedSlot.mine && (
-            <>
-              <button
-                className="btn"
-                disabled={busy === selectedSlot.bookingId}
-                onClick={() =>
-                  toggleOpen(selectedSlot.bookingId!, !selectedSlot.openForPlayers)
-                }
-              >
-                {selectedSlot.openForPlayers
-                  ? "Fechar procura de parceiros"
-                  : "🎾 Procurar parceiros"}
-              </button>
-              {selectedSlot.openForPlayers && (
-                <div style={{ marginTop: 12 }}>
-                  <strong>Interessados ({selectedSlot.interestCount}):</strong>
-                  {selectedSlot.interested && selectedSlot.interested.length > 0 ? (
-                    <ul>
-                      {selectedSlot.interested.map((l) => (
-                        <li key={l}>{l}</li>
-                      ))}
-                    </ul>
-                  ) : (
-                    <p className="muted">Ninguém sinalizou ainda.</p>
-                  )}
-                </div>
-              )}
-            </>
+          {selectedSlot.partnerLabel && (
+            <p className="muted" style={{ marginTop: -6 }}>Jogo em dupla. 🎾</p>
           )}
 
-          {/* Outro morador: sinaliza interesse se aberto */}
-          {!selectedSlot.mine && selectedSlot.openForPlayers && (
-            <>
-              <p className="muted">
-                Este morador procura parceiros para jogar neste horário.
-              </p>
-              <button
-                className="btn"
-                disabled={busy === selectedSlot.bookingId}
-                onClick={() =>
-                  setInterest(selectedSlot.bookingId!, !selectedSlot.iAmInterested)
-                }
-              >
-                {selectedSlot.iAmInterested
-                  ? "Remover meu interesse"
-                  : "Tenho interesse em jogar"}
-              </button>
-              {selectedSlot.interestCount! > 0 && (
-                <p className="muted" style={{ marginTop: 8 }}>
-                  {selectedSlot.interestCount} interessado(s):{" "}
-                  {selectedSlot.interested?.join(", ")}
-                </p>
-              )}
-            </>
-          )}
-
-          {!selectedSlot.mine && !selectedSlot.openForPlayers && (
-            <p className="muted">Horário fechado para parceiros.</p>
-          )}
-
-          {/* Lista de espera: qualquer morador (que não seja o dono) pode entrar. */}
-          {!selectedSlot.mine && (
+          {/* Lista de espera: quem não joga neste horário pode entrar. */}
+          {!selectedSlot.mine && !selectedSlot.iAmPartner && (
             <div
               style={{
                 marginTop: 12,

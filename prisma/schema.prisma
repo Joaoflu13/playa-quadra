@@ -55,6 +55,22 @@ model Apartment {
   resetTokens  PasswordResetToken[]
   recurrings   RecurringBooking[]
   waitlist     Waitlist[]
+  openMatches  OpenMatch[]
+}
+
+/// "Jogo aberto": um morador procura parceiro num horário, SEM reservar a quadra.
+/// O slot continua livre (qualquer um pode reservar sozinho). Quando outro morador
+/// entra ("Eu quero"), vira uma reserva confirmada para a dupla e o OpenMatch some.
+model OpenMatch {
+  id        String    @id @default(cuid())
+  courtId   String
+  startAt   DateTime
+  aptId     String // quem está procurando parceiro
+  apartment Apartment @relation(fields: [aptId], references: [id], onDelete: Cascade)
+  createdAt DateTime  @default(now())
+
+  @@unique([courtId, startAt]) // um jogo aberto por horário
+  @@index([aptId])
 }
 
 /// Lista de espera de um horário ocupado. É ancorada ao SLOT (courtId+startAt),

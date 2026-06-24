@@ -64,6 +64,13 @@ export async function GET(req: NextRequest) {
     waitByStart.set(k, cur);
   }
 
+  // Jogos abertos do dia (procurando parceiro, sem reserva firme).
+  const openMatches = await prisma.openMatch.findMany({
+    where: { courtId: COURT_ID, startAt: { gte: dayStart, lt: dayEnd } },
+    select: { startAt: true, aptId: true, apartment: { select: { label: true, unit: true } } },
+  });
+  const matchByStart = new Map(openMatches.map((m) => [m.startAt.getTime(), m]));
+
   // Bloqueios da quadra que tocam o dia (manutenção, torneio, etc.).
   const blocks = await prisma.courtBlock.findMany({
     where: { courtId: COURT_ID, startAt: { lt: dayEnd }, endAt: { gt: dayStart } },
@@ -75,6 +82,8 @@ export async function GET(req: NextRequest) {
   const now = new Date();
   const maxDate = new Date(now.getTime() + cfg.advanceHours * 3_600_000);
 
+  const withUnit = (label: string, unit: string) => (unit ? `${label} (${unit})` : label);
+
   const grid = slots.map((start) => {
     const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
     const b = byStart.get(start.getTime());
@@ -82,7 +91,9 @@ export async function GET(req: NextRequest) {
     const block = !b ? blockFor(start, end) : null;
     const bookable = !taken && !block && start > now && start <= maxDate;
 
+    // Slot livre: pode ter um "jogo aberto" (alguém procurando parceiro).
     if (!b) {
+      const om = matchByStart.get(start.getTime());
       return {
         startAt: start.toISOString(),
         endAt: end.toISOString(),
@@ -90,17 +101,21 @@ export async function GET(req: NextRequest) {
         bookable,
         blocked: !!block,
         blockReason: block?.reason ?? null,
+        openMatch: !!om,
+        openMatchBy: om ? withUnit(om.apartment.label, om.apartment.unit) : null,
+        openMatchMine: !!om && om.aptId === viewerAptId,
+        waitlistCount: waitByStart.get(start.getTime())?.count ?? 0,
+        iAmWaiting: waitByStart.get(start.getTime())?.mine ?? false,
       };
     }
 
-    const withUnit = (label: string, unit: string) =>
-      unit ? `${label} (${unit})` : label;
     const mine = viewerAptId === b.aptId;
-
-    // LGPD: o nome de quem reservou só é revelado quando há base para isso —
-    // é a sua reserva, você é o síndico, ou o dono abriu "procuro parceiros"
-    // (consentiu aparecer). Caso contrário, o slot é apenas "Ocupado".
-    const canSeeOwner = mine || viewerIsAdmin || b.openForPlayers;
+    // No novo "jogo aberto", o parceiro fica registrado como JoinInterest da reserva.
+    const partner = b.interests[0];
+    const hasPartner = !!partner;
+    const iAmPartner = !!viewerAptId && b.interests.some((i) => i.aptId === viewerAptId);
+    // Nomes visíveis: dono/síndico sempre; numa dupla (ambos consentiram), todos veem.
+    const canSee = mine || viewerIsAdmin || hasPartner;
 
     return {
       startAt: start.toISOString(),
@@ -108,16 +123,10 @@ export async function GET(req: NextRequest) {
       taken,
       bookable,
       bookingId: b.id,
-      ownerLabel: canSeeOwner ? withUnit(b.apartment.label, b.apartment.unit) : null,
+      ownerLabel: canSee ? withUnit(b.apartment.label, b.apartment.unit) : null,
+      partnerLabel: hasPartner ? withUnit(partner.apartment.label, partner.apartment.unit) : null,
       mine,
-      openForPlayers: b.openForPlayers,
-      interestCount: b.interests.length,
-      // Lista de interessados só para o dono e o síndico (quem precisa decidir).
-      interested:
-        mine || viewerIsAdmin
-          ? b.interests.map((i) => withUnit(i.apartment.label, i.apartment.unit))
-          : [],
-      iAmInterested: !!viewerAptId && b.interests.some((i) => i.aptId === viewerAptId),
+      iAmPartner,
       waitlistCount: waitByStart.get(start.getTime())?.count ?? 0,
       iAmWaiting: waitByStart.get(start.getTime())?.mine ?? false,
     };
