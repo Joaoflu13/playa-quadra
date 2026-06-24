@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { slotStartsForDate, COURT_ID, TZ_OFFSET, cleanUnit } from "@/lib/availability";
+import { slotStartsForDate, COURT_ID, TZ_OFFSET, cleanUnit, isValidCourt } from "@/lib/availability";
 
 /**
  * GET /api/availability?date=YYYY-MM-DD
@@ -24,6 +24,9 @@ export async function GET(req: NextRequest) {
   }
   const viewerAptId = session.user.aptId as string;
 
+  const courtParam = req.nextUrl.searchParams.get("court");
+  const courtId = isValidCourt(courtParam) ? (courtParam as string) : COURT_ID;
+
   const cfg = await getConfig();
   const slots = slotStartsForDate(date, cfg.openHour, cfg.closeHour);
 
@@ -32,7 +35,7 @@ export async function GET(req: NextRequest) {
 
   const booked = await prisma.booking.findMany({
     where: {
-      courtId: COURT_ID,
+      courtId,
       status: "CONFIRMED",
       startAt: { gte: dayStart, lt: dayEnd },
     },
@@ -51,7 +54,7 @@ export async function GET(req: NextRequest) {
 
   // Lista de espera do dia, agregada por horário (contagem + se o viewer está nela).
   const waits = await prisma.waitlist.findMany({
-    where: { courtId: COURT_ID, startAt: { gte: dayStart, lt: dayEnd } },
+    where: { courtId, startAt: { gte: dayStart, lt: dayEnd } },
     select: { startAt: true, aptId: true },
   });
   const waitByStart = new Map<number, { count: number; mine: boolean }>();
@@ -67,7 +70,7 @@ export async function GET(req: NextRequest) {
   let openMatches: { startAt: Date; aptId: string; apartment: { label: string; unit: string } }[] = [];
   try {
     openMatches = await prisma.openMatch.findMany({
-      where: { courtId: COURT_ID, startAt: { gte: dayStart, lt: dayEnd } },
+      where: { courtId, startAt: { gte: dayStart, lt: dayEnd } },
       select: { startAt: true, aptId: true, apartment: { select: { label: true, unit: true } } },
     });
   } catch (e) {
@@ -78,7 +81,7 @@ export async function GET(req: NextRequest) {
 
   // Bloqueios da quadra que tocam o dia (manutenção, torneio, etc.).
   const blocks = await prisma.courtBlock.findMany({
-    where: { courtId: COURT_ID, startAt: { lt: dayEnd }, endAt: { gt: dayStart } },
+    where: { courtId, startAt: { lt: dayEnd }, endAt: { gt: dayStart } },
     select: { startAt: true, endAt: true, reason: true },
   });
   const blockFor = (s: Date, e: Date) =>

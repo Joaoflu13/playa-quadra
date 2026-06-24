@@ -2,7 +2,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/db";
-import CourtReveal from "@/components/CourtReveal";
+import AreaReveal from "@/components/AreaReveal";
 import NotificationsBell from "@/components/NotificationsBell";
 
 export default async function HomePage() {
@@ -45,7 +45,8 @@ export default async function HomePage() {
           </form>
         </div>
       </div>
-      <CourtReveal />
+      <AreaReveal courtId="court-1" title="Quadra de Tênis" withPhoto allowMatch />
+      <AreaReveal courtId="court-2" title="Mesa de Sinuca" emoji="🎱" allowMatch={false} />
       </div>
     </main>
   );
