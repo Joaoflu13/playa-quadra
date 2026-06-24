@@ -22,8 +22,14 @@ export const DEFAULTS: Config = {
   noShowBlockDays: 7, // bloqueio de 7 dias por falta
 };
 
-/** Lê o singleton RuleConfig (id=1); se ausente, devolve DEFAULTS. */
+/** Lê o singleton RuleConfig (id=1); se ausente ou indisponível, devolve DEFAULTS. */
 export async function getConfig(): Promise<Config> {
-  const row = await prisma.ruleConfig.findUnique({ where: { id: 1 } });
-  return row ?? DEFAULTS;
+  try {
+    const row = await prisma.ruleConfig.findUnique({ where: { id: 1 } });
+    return row ?? DEFAULTS;
+  } catch (e) {
+    // Ex.: coluna nova ainda não migrada no banco — não derruba a grade.
+    console.error("getConfig: usando DEFAULTS (falha ao ler RuleConfig)", e);
+    return DEFAULTS;
+  }
 }

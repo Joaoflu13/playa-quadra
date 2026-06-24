@@ -184,9 +184,9 @@ export async function POST(req: NextRequest) {
 
     // Reservou sozinho um horário que tinha "jogo aberto"? A procura cai e quem
     // a abriu é avisado (o horário ficou livre pra todos — quem reservar leva).
-    const openMatch = await prisma.openMatch.findUnique({
-      where: { courtId_startAt: { courtId: COURT_ID, startAt: start } },
-    });
+    const openMatch = await prisma.openMatch
+      .findUnique({ where: { courtId_startAt: { courtId: COURT_ID, startAt: start } } })
+      .catch(() => null);
     if (openMatch) {
       await prisma.openMatch.delete({ where: { id: openMatch.id } }).catch(() => {});
       if (openMatch.aptId !== aptId) {
