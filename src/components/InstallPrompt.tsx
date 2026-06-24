@@ -4,6 +4,28 @@ import { useEffect, useState } from "react";
 
 const DISMISS_KEY = "installPromptDismissed";
 
+// Ícone "Compartilhar" do iPhone (caixinha com a seta para cima).
+function ShareIcon() {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      width="18"
+      height="18"
+      fill="none"
+      stroke="#1668b3"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-label="ícone Compartilhar"
+      style={{ verticalAlign: "-4px", margin: "0 2px" }}
+    >
+      <path d="M12 15V4" />
+      <path d="M8 7l4-4 4 4" />
+      <path d="M6 11H5a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-6a2 2 0 0 0-2-2h-1" />
+    </svg>
+  );
+}
+
 // Tipo mínimo do evento beforeinstallprompt (não tipado pelo TS por padrão).
 type BIPEvent = Event & {
   prompt: () => Promise<void>;
@@ -74,7 +96,7 @@ export default function InstallPrompt() {
       <span className="install-text">
         {mode === "ios" ? (
           <>
-            📲 Instale como app: toque em <strong>Compartilhar</strong> e depois em{" "}
+            📲 Instale como app: toque em <ShareIcon /> (na barra do Safari) e depois em{" "}
             <strong>“Adicionar à Tela de Início”</strong>.
           </>
         ) : (
