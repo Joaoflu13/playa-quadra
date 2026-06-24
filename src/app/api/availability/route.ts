@@ -64,10 +64,16 @@ export async function GET(req: NextRequest) {
   }
 
   // Jogos abertos do dia (procurando parceiro, sem reserva firme).
-  const openMatches = await prisma.openMatch.findMany({
-    where: { courtId: COURT_ID, startAt: { gte: dayStart, lt: dayEnd } },
-    select: { startAt: true, aptId: true, apartment: { select: { label: true, unit: true } } },
-  });
+  let openMatches: { startAt: Date; aptId: string; apartment: { label: string; unit: string } }[] = [];
+  try {
+    openMatches = await prisma.openMatch.findMany({
+      where: { courtId: COURT_ID, startAt: { gte: dayStart, lt: dayEnd } },
+      select: { startAt: true, aptId: true, apartment: { select: { label: true, unit: true } } },
+    });
+  } catch (e) {
+    // Tabela ainda não migrada? Não derruba a grade.
+    console.error("availability: OpenMatch indisponível", e);
+  }
   const matchByStart = new Map(openMatches.map((m) => [m.startAt.getTime(), m]));
 
   // Bloqueios da quadra que tocam o dia (manutenção, torneio, etc.).

@@ -90,9 +90,9 @@ export default function BookingBoard() {
           fetch(`/api/availability?date=${date}`),
           fetch(`/api/bookings`),
         ]);
-        const avail = await availRes.json();
-        const mineData = await mineRes.json();
-        if (!availRes.ok) throw new Error(avail.error ?? "Falha ao carregar");
+        const avail = await availRes.json().catch(() => ({}));
+        const mineData = await mineRes.json().catch(() => ({}));
+        if (!availRes.ok) throw new Error(avail.error ?? `Falha ao carregar (${availRes.status})`);
         setSlots(avail.slots ?? []);
         setMine(mineData.bookings ?? []);
       } catch (e) {
@@ -135,8 +135,8 @@ export default function BookingBoard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(body),
       });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error ?? "Operação falhou");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data.error ?? `Operação falhou (${res.status})`);
       await load();
     } catch (e) {
       setError(e instanceof Error ? e.message : "Erro");
