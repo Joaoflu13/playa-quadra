@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { COURT_ID, TZ_OFFSET, isValidCourt } from "@/lib/availability";
+import { COURT_ID, TZ_OFFSET, isValidCourt, courtLabel } from "@/lib/availability";
 import { sendBookingConfirmation } from "@/lib/mail";
 
 /**
@@ -309,7 +309,7 @@ export async function DELETE(req: NextRequest) {
       data: waiters.map((w) => ({
         aptId: w.aptId,
         type: "WAITLIST_OPEN",
-        message: `A vaga da quadra de ${quando} liberou! Entre no app e reserve antes que acabe.`,
+        message: `Vaga liberada — ${courtLabel(booking.courtId)} às ${quando}. Entre no app e reserve antes que acabe.`,
       })),
     });
     await prisma.waitlist.deleteMany({

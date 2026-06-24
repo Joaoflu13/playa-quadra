@@ -37,13 +37,13 @@ export async function activateAccount(form: FormData) {
   if (next !== confirm) redirect("/ativar?status=mismatch");
 
   // Anti força-bruta: bloqueia o CPF após tentativas erradas demais.
-  if (isLocked(NS + cpf)) redirect("/ativar?status=locked");
+  if (await isLocked(NS + cpf)) redirect("/ativar?status=locked");
 
   const apt = await prisma.apartment.findUnique({ where: { cpf } });
 
   // Anti-enumeração: CPF inexistente e unidade errada dão a mesma mensagem.
   if (!apt || norm(apt.unit) !== norm(unit)) {
-    registerFailure(NS + cpf);
+    await registerFailure(NS + cpf);
     redirect("/ativar?status=nomatch");
   }
   // Já ativada: não deixa um terceiro "reativar" (resetar) a conta.
@@ -62,6 +62,6 @@ export async function activateAccount(form: FormData) {
     },
   });
 
-  clearFailures(NS + cpf);
+  await clearFailures(NS + cpf);
   redirect("/login?activated=1");
 }

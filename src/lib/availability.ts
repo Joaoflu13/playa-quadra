@@ -15,6 +15,11 @@ export function isValidCourt(id: string | null | undefined): boolean {
   return COURTS.some((c) => c.id === id);
 }
 
+/** Retorna o nome legível de uma área pelo id (ex.: "court-2" → "Mesa de Sinuca"). */
+export function courtLabel(id: string): string {
+  return COURTS.find((c) => c.id === id)?.name ?? "Área comum";
+}
+
 /**
  * Remove o prefixo "Bloco X - " da unidade (o Playa del Mago só tem um bloco).
  * "Bloco A - 304" -> "304" · "Bloco A 101" -> "101" · "304" -> "304".

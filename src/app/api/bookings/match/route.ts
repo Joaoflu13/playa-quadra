@@ -3,15 +3,15 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { COURT_ID, cleanUnit } from "@/lib/availability";
+import { COURT_ID, cleanUnit, isValidCourt, courtLabel } from "@/lib/availability";
 
 /**
  * "Jogo aberto" — procurar parceiro SEM reservar o horário.
  *
- *  POST   /api/bookings/match  { startAt, action: "open" }  -> abre a procura
- *  POST   /api/bookings/match  { startAt, action: "join" }  -> "Eu quero": fecha a
- *                                                              dupla e reserva o horário
- *  DELETE /api/bookings/match  { startAt }                  -> cancela a própria procura
+ *  POST   /api/bookings/match  { startAt, courtId?, action: "open" }  -> abre a procura
+ *  POST   /api/bookings/match  { startAt, courtId?, action: "join" }  -> "Eu quero": fecha a
+ *                                                                        dupla e reserva o horário
+ *  DELETE /api/bookings/match  { startAt, courtId? }                  -> cancela a própria procura
  */
 
 type Cfg = Awaited<ReturnType<typeof getConfig>>;
@@ -59,6 +59,7 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => ({}));
   const action = body?.action === "join" ? "join" : "open";
+  const courtId = isValidCourt(body?.courtId) ? (body.courtId as string) : COURT_ID;
   const start = new Date(body?.startAt);
   const cfg = await getConfig();
   const err = validateSlot(start, cfg);
@@ -66,13 +67,13 @@ export async function POST(req: NextRequest) {
 
   const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
 
-  // Quadra bloqueada pelo síndico?
+  // Área bloqueada pelo síndico?
   const block = await prisma.courtBlock.findFirst({
-    where: { courtId: COURT_ID, startAt: { lt: end }, endAt: { gt: start } },
+    where: { courtId, startAt: { lt: end }, endAt: { gt: start } },
     select: { reason: true },
   });
   if (block) {
-    return NextResponse.json({ error: `Quadra indisponível: ${block.reason}` }, { status: 422 });
+    return NextResponse.json({ error: `Área indisponível: ${block.reason}` }, { status: 422 });
   }
 
   const me = await prisma.apartment.findUnique({ where: { id: aptId } });
@@ -85,14 +86,14 @@ export async function POST(req: NextRequest) {
   // ---------- ABRIR A PROCURA ----------
   if (action === "open") {
     const taken = await prisma.booking.findFirst({
-      where: { courtId: COURT_ID, startAt: start, status: "CONFIRMED" },
+      where: { courtId, startAt: start, status: "CONFIRMED" },
       select: { id: true },
     });
     if (taken) return NextResponse.json({ error: "Horário já reservado" }, { status: 422 });
 
     // Não deixa abrir procura se já estourou o limite de reservas ativas.
     const active = await prisma.booking.count({
-      where: { aptId, status: "CONFIRMED", startAt: { gt: new Date() } },
+      where: { aptId, courtId, status: "CONFIRMED", startAt: { gt: new Date() } },
     });
     if (active >= cfg.maxActivePerApt) {
       return NextResponse.json(
@@ -102,7 +103,7 @@ export async function POST(req: NextRequest) {
     }
 
     try {
-      await prisma.openMatch.create({ data: { courtId: COURT_ID, startAt: start, aptId } });
+      await prisma.openMatch.create({ data: { courtId, startAt: start, aptId } });
     } catch (e) {
       if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
         return NextResponse.json({ error: "Já há alguém procurando parceiro neste horário" }, { status: 409 });
@@ -114,7 +115,7 @@ export async function POST(req: NextRequest) {
 
   // ---------- "EU QUERO": fechar a dupla e reservar ----------
   const match = await prisma.openMatch.findUnique({
-    where: { courtId_startAt: { courtId: COURT_ID, startAt: start } },
+    where: { courtId_startAt: { courtId, startAt: start } },
   });
   if (!match) return NextResponse.json({ error: "Não há procura de parceiro neste horário" }, { status: 422 });
   if (match.aptId === aptId) {
@@ -123,7 +124,7 @@ export async function POST(req: NextRequest) {
 
   // A reserva conta no limite de quem ABRIU (match.aptId).
   const ownerActive = await prisma.booking.count({
-    where: { aptId: match.aptId, status: "CONFIRMED", startAt: { gt: new Date() } },
+    where: { aptId: match.aptId, courtId, status: "CONFIRMED", startAt: { gt: new Date() } },
   });
   if (ownerActive >= cfg.maxActivePerApt) {
     return NextResponse.json(
@@ -136,7 +137,7 @@ export async function POST(req: NextRequest) {
     const result = await prisma.$transaction(async (tx) => {
       // Reaproveita linha cancelada do mesmo slot, se houver (a unique impede 2 linhas).
       const existing = await tx.booking.findUnique({
-        where: { courtId_startAt: { courtId: COURT_ID, startAt: start } },
+        where: { courtId_startAt: { courtId, startAt: start } },
       });
       let booking;
       if (existing) {
@@ -148,7 +149,7 @@ export async function POST(req: NextRequest) {
         });
       } else {
         booking = await tx.booking.create({
-          data: { courtId: COURT_ID, aptId: match.aptId, startAt: start, endAt: end, status: "CONFIRMED" },
+          data: { courtId, aptId: match.aptId, startAt: start, endAt: end, status: "CONFIRMED" },
         });
       }
       // Registra o parceiro (quem clicou "Eu quero") como JoinInterest da reserva.
@@ -159,12 +160,13 @@ export async function POST(req: NextRequest) {
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     // Avisa quem abriu que a dupla fechou.
+    const areaName = courtLabel(courtId);
     await prisma.notification.create({
       data: {
         aptId: match.aptId,
         type: "MATCH_FILLED",
         bookingId: result.id,
-        message: `${me.label}${cleanUnit(me.unit) ? ` (${cleanUnit(me.unit)})` : ""} topou jogar com você. Quadra reservada para ${fmtSP(start)}!`,
+        message: `${me.label}${cleanUnit(me.unit) ? ` (${cleanUnit(me.unit)})` : ""} topou jogar com você — ${areaName} em ${fmtSP(start)}!`,
       },
     });
     return NextResponse.json({ ok: true, booked: true });
@@ -185,10 +187,11 @@ export async function DELETE(req: NextRequest) {
   }
   const aptId = session.user.aptId as string;
   const body = await req.json().catch(() => ({}));
+  const courtId = isValidCourt(body?.courtId) ? (body.courtId as string) : COURT_ID;
   const start = new Date(body?.startAt);
   if (Number.isNaN(start.getTime())) return NextResponse.json({ error: "startAt inválido" }, { status: 400 });
 
-  await prisma.openMatch.deleteMany({ where: { courtId: COURT_ID, startAt: start, aptId } });
+  await prisma.openMatch.deleteMany({ where: { courtId, startAt: start, aptId } });
   return NextResponse.json({ ok: true, open: false });
 }
 

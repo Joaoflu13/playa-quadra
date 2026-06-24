@@ -205,6 +205,16 @@ model RuleConfig {
   noShowBlockDays    Int @default(7) // dias de bloqueio por falta
 }
 
+/// Controle de tentativas de login/ativação — substitui o Map in-memory do rateLimit.ts.
+/// Chave: namespace + identificador (ex.: "login:12345678900", "ativar:12345678900").
+/// Persiste entre restarts e é compartilhado entre instâncias serverless.
+model RateLimit {
+  key         String    @id          // namespace:cpf
+  fails       Int       @default(0)
+  firstAt     DateTime
+  lockedUntil DateTime?
+}
+
 /// V1 — rastreio de no-show / late-cancel para suspensão automática.
 model Penalty {
   id        String    @id @default(cuid())
