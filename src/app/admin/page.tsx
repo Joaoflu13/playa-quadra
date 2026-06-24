@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { getConfig } from "@/lib/rules";
 import { formatCpf } from "@/lib/cpf";
 import ResetPasswordField from "@/components/ResetPasswordField";
+import { cleanUnit } from "@/lib/availability";
 import {
   updateRules,
   createApartment,
@@ -151,7 +152,7 @@ export default async function AdminPage() {
               {topApts.map((a) => (
                 <li key={a.label + a.unit}>
                   {a.label}
-                  {a.unit ? ` (${a.unit})` : ""} — <strong>{a.count}</strong> reserva(s)
+                  {cleanUnit(a.unit) ? ` (${cleanUnit(a.unit)})` : ""} — <strong>{a.count}</strong> reserva(s)
                 </li>
               ))}
             </ol>
@@ -264,7 +265,7 @@ export default async function AdminPage() {
               <li key={r.id} className="row row-stack" style={{ padding: "8px 0", borderTop: "1px solid var(--border)" }}>
                 <span>
                   🎾 <strong>{WEEKDAYS[r.weekday]}</strong> às {String(r.hour).padStart(2, "0")}h ·{" "}
-                  {r.apartment.label}{r.apartment.unit ? ` (${r.apartment.unit})` : ""}
+                  {r.apartment.label}{cleanUnit(r.apartment.unit) ? ` (${cleanUnit(r.apartment.unit)})` : ""}
                 </span>
                 <form action={removeRecurring.bind(null, r.id)}>
                   <button className="btn btn-2" type="submit">Encerrar</button>
@@ -290,7 +291,7 @@ export default async function AdminPage() {
             </div>
             <div>
               <label htmlFor="unit">Unidade</label>
-              <input id="unit" name="unit" placeholder="Bloco A - 304" />
+              <input id="unit" name="unit" placeholder="ex.: 304" />
             </div>
             <div>
               <label htmlFor="email">E-mail (opcional)</label>
@@ -312,13 +313,13 @@ export default async function AdminPage() {
         <h2 style={{ marginTop: 0 }}>Importar moradores (em massa)</h2>
         <p className="muted">
           Uma linha por morador, no formato: <code>CPF, Nome, Unidade, E-mail</code> (e-mail
-          opcional). Ex.: <code>123.456.789-09, Ana Lima, Bloco C 201, ana@email.com</code>
+          opcional). Ex.: <code>123.456.789-09, Ana Lima, 201, ana@email.com</code>
         </p>
         <form action={importResidents}>
           <textarea
             name="csv"
             rows={6}
-            placeholder={"111.111.111-11, Fulano, Bloco A 101\n222.222.222-22, Beltrano, Bloco A 102, beltrano@email.com"}
+            placeholder={"111.111.111-11, Fulano, 101\n222.222.222-22, Beltrano, 102, beltrano@email.com"}
             style={{
               width: "100%",
               padding: "10px 12px",
@@ -361,7 +362,7 @@ export default async function AdminPage() {
                     {a.role === "ADMIN" && <span className="muted">(admin)</span>}
                     <div className="muted">
                       {formatCpf(a.cpf)}
-                      {a.unit ? ` · ${a.unit}` : ""} ·{" "}
+                      {cleanUnit(a.unit) ? ` · ${cleanUnit(a.unit)}` : ""} ·{" "}
                       {a.status === "SUSPENDED" ? "🔴 suspenso" : "🟢 ativo"}
                       {blocked && ` · ⛔ bloqueado até ${hhmm(a.blockedUntil!)}`} · faltas:{" "}
                       {a._count.penalties}
@@ -418,7 +419,7 @@ export default async function AdminPage() {
               <li key={b.id} className="row" style={{ padding: "8px 0" }}>
                 <span>
                   {hhmm(b.startAt)} · {b.apartment.label}
-                  {b.apartment.unit ? ` (${b.apartment.unit})` : ""}
+                  {cleanUnit(b.apartment.unit) ? ` (${cleanUnit(b.apartment.unit)})` : ""}
                 </span>
                 <form action={markNoShow.bind(null, b.id)}>
                   <button className="btn-danger btn" type="submit">

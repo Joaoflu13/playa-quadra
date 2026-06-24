@@ -7,8 +7,8 @@ Só o administrador vê o painel **Admin** (botão no topo).
 ## 1. Primeiro passo: cadastrar os moradores
 No painel, em **Importar moradores (em massa)**, cole a lista (uma linha por morador):
 ```
-CPF, Nome, Unidade, E-mail(opcional)
-123.456.789-09, Ana Lima, Bloco A 101, ana@email.com
+CPF, Nome, Apartamento, E-mail(opcional)
+123.456.789-09, Ana Lima, 101, ana@email.com
 ```
 - **Deixe a senha em branco** → cada morador cria a própria senha sozinho (recomendado).
 - Avise os moradores para entrarem em **"Primeiro acesso? Ative sua conta"** (CPF + unidade).

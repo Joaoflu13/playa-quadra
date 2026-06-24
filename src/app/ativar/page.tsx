@@ -38,11 +38,11 @@ export default async function AtivarPage({
           />
         </div>
         <div style={{ marginBottom: 12 }}>
-          <label htmlFor="unit">Unidade</label>
+          <label htmlFor="unit">Apartamento (nº)</label>
           <input
             id="unit"
             name="unit"
-            placeholder="ex.: Bloco A - 304"
+            placeholder="ex.: 304"
             required
             autoComplete="off"
           />
