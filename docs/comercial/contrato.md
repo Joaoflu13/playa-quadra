@@ -21,14 +21,15 @@ As partes ajustam o presente contrato, regido pelas cláusulas seguintes.
 
 ## Cláusula 1 — Objeto
 1.1. A CONTRATADA concede à CONTRATANTE o **direito de uso** (licença não exclusiva e
-intransferível), na modalidade software como serviço (SaaS), do sistema de **reserva da
-quadra de tênis** do condomínio, acessível via web em `https://playa-quadra.vercel.app`,
-incluindo hospedagem, manutenção e suporte nos termos deste contrato.
+intransferível), na modalidade software como serviço (SaaS), do sistema de **reserva de
+áreas comuns** (quadra de tênis e mesa de sinuca) do condomínio, acessível via web em
+`https://playa-quadra.vercel.app`, incluindo hospedagem, manutenção e suporte nos termos
+deste contrato.
 
 1.2. O sistema permite, entre outros: login do morador por CPF, reserva e cancelamento de
-horários, lista de espera, "procuro parceiros", notificações, painel administrativo do
-síndico (regras, relatórios, bloqueio da quadra, reserva fixa, cadastro de moradores e
-auto-cadastro).
+horários nas duas áreas, lista de espera, "procuro parceiros" (quadra de tênis),
+notificações, painel administrativo do síndico (regras, relatórios, bloqueio de área,
+reserva fixa, cadastro de moradores e auto-cadastro).
 
 ## Cláusula 2 — Serviços incluídos na mensalidade (manutenção)
 Estão **inclusos**, sem custo adicional:
@@ -85,35 +86,29 @@ com aviso prévio.
 configuração inicial do sistema, o cadastro/pré-autorização dos moradores e a colocação em
 operação. Não reembolsável após a conclusão da implantação.
 
-5.1. **Mensalidade de manutenção (quadra de tênis):** **R$ 385,00/mês** (equivalente a
-R$ 2,50 por apartamento, base de 154 unidades), cobrindo a Cláusula 2.
+5.1. **Mensalidade de manutenção (quadra de tênis + mesa de sinuca):** **R$ 395,00/mês**
+(equivalente a R$ 2,50 por unidade, base de 158 unidades — 156 apartamentos + síndico +
+administrador), cobrindo a Cláusula 2.
 
 5.2. **Add-on por nova área comum:** **R$ 100,00/mês** por área, quando contratada.
 
 5.3. **Evolução (Cláusula 3):** **R$ 150,00/hora**, mediante orçamento prévio aprovado.
 
-5.4. **Plano anual (opcional):** **R$ 4.158,00/ano**, pago à vista (~10% de desconto), em
-substituição à mensalidade do período.
+5.4. **Vencimento:** todo dia [10] de cada mês, via [PIX/transferência/boleto].
 
-5.5. **Vencimento:** todo dia [10] de cada mês, via [PIX/transferência/boleto].
+5.5. **Reajuste:** anual, pela variação do **IPCA** (ou índice que o substitua).
 
-5.6. **Reajuste:** anual, pela variação do **IPCA** (ou índice que o substitua).
-
-5.7. A **hospedagem** está inclusa na mensalidade; a CONTRATANTE não receberá cobranças
+5.6. A **hospedagem** está inclusa na mensalidade; a CONTRATANTE não receberá cobranças
 separadas de servidor/infraestrutura.
 
 ## Cláusula 6 — Vigência, experiência inicial e rescisão
 6.1. **Vigência:** 12 (doze) meses, renovável automaticamente por iguais períodos, salvo
 manifestação em contrário com 30 dias de antecedência.
 
-6.2. **Sem fidelidade nos primeiros 30 dias:** nos 30 (trinta) primeiros dias, a CONTRATANTE
-pode rescindir **sem multa** e sem ônus, por simples comunicação.
+6.2. Qualquer parte pode rescindir mediante **aviso prévio de 30 dias**. Valores de
+mensalidade já vencidos não são reembolsáveis.
 
-6.3. Após esse período, qualquer parte pode rescindir mediante **aviso prévio de 30 dias**.
-Valores de mensalidade já vencidos não são reembolsáveis; o plano anual pago à vista é
-reembolsado proporcionalmente aos meses não usufruídos.
-
-6.4. Em caso de encerramento, a CONTRATADA disponibiliza, mediante solicitação, **exportação
+6.3. Em caso de encerramento, a CONTRATADA disponibiliza, mediante solicitação, **exportação
 dos dados** dos moradores e reservas em formato legível (CSV), por até 30 dias.
 
 ## Cláusula 7 — Obrigações da CONTRATADA
