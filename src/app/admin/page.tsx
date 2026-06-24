@@ -47,7 +47,7 @@ const RULE_FIELDS: { key: string; label: string }[] = [
   { key: "slotMinutes", label: "Duração do slot (min)" },
   { key: "openHour", label: "Abre (hora)" },
   { key: "closeHour", label: "Fecha (hora)" },
-  { key: "advanceDays", label: "Antecedência máx. (dias)" },
+  { key: "advanceHours", label: "Antecedência máx. (horas)" },
   { key: "maxActivePerApt", label: "Reservas ativas por morador" },
   { key: "maxWeeklyPerApt", label: "Reservas por 7 dias" },
   { key: "cancelMinNoticeMin", label: "Antecedência p/ cancelar (min)" },

@@ -50,7 +50,7 @@ export async function updateRules(form: FormData) {
     slotMinutes: int(form, "slotMinutes", 60),
     openHour: int(form, "openHour", 8),
     closeHour: int(form, "closeHour", 22),
-    advanceDays: int(form, "advanceDays", 1),
+    advanceHours: int(form, "advanceHours", 24),
     maxActivePerApt: int(form, "maxActivePerApt", 2),
     maxWeeklyPerApt: int(form, "maxWeeklyPerApt", 3),
     cancelMinNoticeMin: int(form, "cancelMinNoticeMin", 120),
