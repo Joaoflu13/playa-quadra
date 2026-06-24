@@ -9,6 +9,8 @@ const MESSAGES: Record<string, string> = {
     "Dados não conferem. Confira o CPF e a unidade exatamente como cadastrados, ou fale com o síndico.",
   already:
     "Esta conta já foi ativada. Use Entrar ou, se esqueceu a senha, Esqueci minha senha.",
+  locked:
+    "Muitas tentativas incorretas. Aguarde alguns minutos e tente de novo.",
 };
 
 export default async function AtivarPage({
