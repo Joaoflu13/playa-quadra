@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
-import { COURT_ID } from "@/lib/availability";
+import { COURT_ID, isValidCourt } from "@/lib/availability";
 
 /**
  * POST /api/bookings/waitlist   { startAt }
@@ -12,11 +12,12 @@ import { COURT_ID } from "@/lib/availability";
  * DELETE /api/bookings/waitlist { startAt }
  * Sai da lista de espera daquele horário.
  */
-async function parse(req: NextRequest): Promise<Date | null> {
+async function parse(req: NextRequest): Promise<{ startAt: Date; courtId: string } | null> {
   const body = await req.json().catch(() => ({}));
   if (!body?.startAt) return null;
   const d = new Date(body.startAt);
-  return Number.isNaN(d.getTime()) ? null : d;
+  if (Number.isNaN(d.getTime())) return null;
+  return { startAt: d, courtId: isValidCourt(body.courtId) ? body.courtId : COURT_ID };
 }
 
 export async function POST(req: NextRequest) {
@@ -26,12 +27,13 @@ export async function POST(req: NextRequest) {
   }
   const aptId = session.user.aptId as string;
 
-  const startAt = await parse(req);
-  if (!startAt) return NextResponse.json({ error: "startAt inválido" }, { status: 400 });
+  const parsed = await parse(req);
+  if (!parsed) return NextResponse.json({ error: "startAt inválido" }, { status: 400 });
+  const { startAt, courtId } = parsed;
 
   // O slot precisa estar ocupado por outro morador para fazer sentido esperar.
   const booking = await prisma.booking.findFirst({
-    where: { courtId: COURT_ID, startAt, status: "CONFIRMED" },
+    where: { courtId, startAt, status: "CONFIRMED" },
     select: { aptId: true },
   });
   if (!booking) {
@@ -42,7 +44,7 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    await prisma.waitlist.create({ data: { courtId: COURT_ID, startAt, aptId } });
+    await prisma.waitlist.create({ data: { courtId, startAt, aptId } });
   } catch (e) {
     // Já estava na fila (unique) — idempotente.
     if (!(e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002")) {
@@ -59,9 +61,10 @@ export async function DELETE(req: NextRequest) {
   }
   const aptId = session.user.aptId as string;
 
-  const startAt = await parse(req);
-  if (!startAt) return NextResponse.json({ error: "startAt inválido" }, { status: 400 });
+  const parsed = await parse(req);
+  if (!parsed) return NextResponse.json({ error: "startAt inválido" }, { status: 400 });
+  const { startAt, courtId } = parsed;
 
-  await prisma.waitlist.deleteMany({ where: { courtId: COURT_ID, startAt, aptId } });
+  await prisma.waitlist.deleteMany({ where: { courtId, startAt, aptId } });
   return NextResponse.json({ ok: true, waiting: false });
 }

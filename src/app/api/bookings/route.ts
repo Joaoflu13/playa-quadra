@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { COURT_ID, TZ_OFFSET } from "@/lib/availability";
+import { COURT_ID, TZ_OFFSET, isValidCourt } from "@/lib/availability";
 import { sendBookingConfirmation } from "@/lib/mail";
 
 /**
@@ -11,15 +11,17 @@ import { sendBookingConfirmation } from "@/lib/mail";
  * Reservas futuras (CONFIRMED) do próprio apartamento — usado pela UI para
  * marcar os slots "meus" e habilitar o cancelamento.
  */
-export async function GET() {
+export async function GET(req: NextRequest) {
   const session = await auth();
   if (!session?.user?.aptId) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   const aptId = session.user.aptId as string;
+  const courtParam = req.nextUrl.searchParams.get("court");
+  const courtId = isValidCourt(courtParam) ? (courtParam as string) : COURT_ID;
 
   const bookings = await prisma.booking.findMany({
-    where: { aptId, status: "CONFIRMED", startAt: { gt: new Date() } },
+    where: { aptId, courtId, status: "CONFIRMED", startAt: { gt: new Date() } },
     select: { id: true, startAt: true, endAt: true },
     orderBy: { startAt: "asc" },
   });
@@ -51,7 +53,7 @@ export async function POST(req: NextRequest) {
   }
   const aptId = session.user.aptId as string;
 
-  let body: { startAt?: string };
+  let body: { startAt?: string; courtId?: string };
   try {
     body = await req.json();
   } catch {
@@ -60,6 +62,7 @@ export async function POST(req: NextRequest) {
   if (!body.startAt) {
     return NextResponse.json({ error: "startAt é obrigatório" }, { status: 400 });
   }
+  const courtId = isValidCourt(body.courtId) ? (body.courtId as string) : COURT_ID;
 
   const cfg = await getConfig();
   const start = new Date(body.startAt);
@@ -99,7 +102,7 @@ export async function POST(req: NextRequest) {
 
   // Quadra bloqueada pelo síndico (manutenção/torneio) neste intervalo?
   const block = await prisma.courtBlock.findFirst({
-    where: { courtId: COURT_ID, startAt: { lt: end }, endAt: { gt: start } },
+    where: { courtId, startAt: { lt: end }, endAt: { gt: start } },
     select: { reason: true },
   });
   if (block) {
@@ -132,7 +135,7 @@ export async function POST(req: NextRequest) {
       aptLabel = apt.label;
 
       const active = await tx.booking.count({
-        where: { aptId, status: "CONFIRMED", startAt: { gt: now } },
+        where: { aptId, courtId, status: "CONFIRMED", startAt: { gt: now } },
       });
       if (active >= cfg.maxActivePerApt) {
         throw new RuleError("MAX_ACTIVE", `Limite de ${cfg.maxActivePerApt} reservas ativas`);
@@ -140,7 +143,7 @@ export async function POST(req: NextRequest) {
 
       const weekAhead = new Date(now.getTime() + 7 * 86_400_000);
       const weekly = await tx.booking.count({
-        where: { aptId, status: "CONFIRMED", startAt: { gte: now, lt: weekAhead } },
+        where: { aptId, courtId, status: "CONFIRMED", startAt: { gte: now, lt: weekAhead } },
       });
       if (weekly >= cfg.maxWeeklyPerApt) {
         throw new RuleError("MAX_WEEKLY", `Limite de ${cfg.maxWeeklyPerApt} reservas em 7 dias`);
@@ -150,7 +153,7 @@ export async function POST(req: NextRequest) {
       // reserva CANCELLED ainda ocupa o slot no banco. Para permitir remarcar um
       // horário cancelado, reaproveitamos a linha existente em vez de criar outra.
       const existing = await tx.booking.findUnique({
-        where: { courtId_startAt: { courtId: COURT_ID, startAt: start } },
+        where: { courtId_startAt: { courtId, startAt: start } },
       });
       if (existing) {
         if (existing.status === "CONFIRMED") {
@@ -172,7 +175,7 @@ export async function POST(req: NextRequest) {
       }
 
       return tx.booking.create({
-        data: { courtId: COURT_ID, aptId, startAt: start, endAt: end, status: "CONFIRMED" },
+        data: { courtId, aptId, startAt: start, endAt: end, status: "CONFIRMED" },
       });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
@@ -185,7 +188,7 @@ export async function POST(req: NextRequest) {
     // Reservou sozinho um horário que tinha "jogo aberto"? A procura cai e quem
     // a abriu é avisado (o horário ficou livre pra todos — quem reservar leva).
     const openMatch = await prisma.openMatch
-      .findUnique({ where: { courtId_startAt: { courtId: COURT_ID, startAt: start } } })
+      .findUnique({ where: { courtId_startAt: { courtId, startAt: start } } })
       .catch(() => null);
     if (openMatch) {
       await prisma.openMatch.delete({ where: { id: openMatch.id } }).catch(() => {});

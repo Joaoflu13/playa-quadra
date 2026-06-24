@@ -4,6 +4,17 @@ export const TZ_OFFSET = "-03:00";
 // Single court: id fixo semeado pelo seed. No V2 isto vira parâmetro.
 export const COURT_ID = "court-1";
 
+/** Áreas reserváveis (cada uma é um "court" no banco). */
+export const COURTS = [
+  { id: "court-1", name: "Quadra de Tênis" },
+  { id: "court-2", name: "Mesa de Sinuca" },
+] as const;
+
+/** true se o id é uma área conhecida. */
+export function isValidCourt(id: string | null | undefined): boolean {
+  return COURTS.some((c) => c.id === id);
+}
+
 /**
  * Remove o prefixo "Bloco X - " da unidade (o Playa del Mago só tem um bloco).
  * "Bloco A - 304" -> "304" · "Bloco A 101" -> "101" · "304" -> "304".

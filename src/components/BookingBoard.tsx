@@ -69,7 +69,13 @@ function shortLabel(label: string): string {
   return (label.split(" ")[0] ?? label).slice(0, 12);
 }
 
-export default function BookingBoard() {
+export default function BookingBoard({
+  courtId = "court-1",
+  allowMatch = true,
+}: {
+  courtId?: string;
+  allowMatch?: boolean;
+}) {
   const today = useMemo(() => todaySP(), []);
   const [date, setDate] = useState(today);
   const [slots, setSlots] = useState<Slot[]>([]);
@@ -87,8 +93,8 @@ export default function BookingBoard() {
       setError(null);
       try {
         const [availRes, mineRes] = await Promise.all([
-          fetch(`/api/availability?date=${date}`),
-          fetch(`/api/bookings`),
+          fetch(`/api/availability?date=${date}&court=${courtId}`),
+          fetch(`/api/bookings?court=${courtId}`),
         ]);
         const avail = await availRes.json().catch(() => ({}));
         const mineData = await mineRes.json().catch(() => ({}));
@@ -101,7 +107,7 @@ export default function BookingBoard() {
         if (!silent) setLoading(false);
       }
     },
-    [date]
+    [date, courtId]
   );
 
   useEffect(() => {
@@ -146,7 +152,7 @@ export default function BookingBoard() {
   }
 
   const book = (startAt: string) =>
-    api("/api/bookings", "POST", { startAt }, startAt);
+    api("/api/bookings", "POST", { startAt, courtId }, startAt);
   // Cancelar abre um modal de confirmação (Sim/Não) em vez do confirm() nativo.
   const cancel = (id: string) => setConfirmCancelId(id);
   const doCancel = async () => {
@@ -162,7 +168,7 @@ export default function BookingBoard() {
   const joinMatch = (startAt: string) =>
     api("/api/bookings/match", "POST", { startAt, action: "join" }, `j-${startAt}`);
   const setWaitlist = (startAt: string, want: boolean) =>
-    api("/api/bookings/waitlist", want ? "POST" : "DELETE", { startAt }, `wl-${startAt}`);
+    api("/api/bookings/waitlist", want ? "POST" : "DELETE", { startAt, courtId }, `wl-${startAt}`);
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: 20 }}>
@@ -318,7 +324,7 @@ export default function BookingBoard() {
           </p>
 
           {/* Alguém já está procurando parceiro neste horário */}
-          {selectedSlot.openMatch && !selectedSlot.openMatchMine && (
+          {allowMatch && selectedSlot.openMatch && !selectedSlot.openMatchMine && (
             <div style={{ marginBottom: 12, padding: "12px", background: "var(--surface-2)", borderRadius: 10 }}>
               <p style={{ margin: "0 0 8px" }}>
                 🎾 <strong>{selectedSlot.openMatchBy}</strong> está procurando parceiro aqui.
@@ -335,7 +341,7 @@ export default function BookingBoard() {
           )}
 
           {/* Eu mesmo estou procurando parceiro neste horário */}
-          {selectedSlot.openMatchMine && (
+          {allowMatch && selectedSlot.openMatchMine && (
             <div style={{ marginBottom: 12 }}>
               <p className="muted" style={{ marginTop: 0 }}>
                 Você está procurando parceiro aqui. O horário só fecha quando alguém entrar.
@@ -358,7 +364,7 @@ export default function BookingBoard() {
             >
               {busy === selectedSlot.startAt ? "Reservando..." : "✅ Reservar para mim"}
             </button>
-            {!selectedSlot.openMatch && (
+            {allowMatch && !selectedSlot.openMatch && (
               <button
                 className="btn btn-2"
                 disabled={busy === `m-${selectedSlot.startAt}`}
