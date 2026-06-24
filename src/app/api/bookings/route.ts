@@ -146,6 +146,31 @@ export async function POST(req: NextRequest) {
         throw new RuleError("MAX_WEEKLY", `Limite de ${cfg.maxWeeklyPerApt} reservas em 7 dias`);
       }
 
+      // A trava @@unique([courtId, startAt]) vale para QUALQUER status, então uma
+      // reserva CANCELLED ainda ocupa o slot no banco. Para permitir remarcar um
+      // horário cancelado, reaproveitamos a linha existente em vez de criar outra.
+      const existing = await tx.booking.findUnique({
+        where: { courtId_startAt: { courtId: COURT_ID, startAt: start } },
+      });
+      if (existing) {
+        if (existing.status === "CONFIRMED") {
+          throw new RuleError("SLOT_TAKEN", "Slot acabou de ser reservado");
+        }
+        // Limpa "procuro parceiros" antigo que ficou preso na linha cancelada.
+        await tx.joinInterest.deleteMany({ where: { bookingId: existing.id } });
+        return tx.booking.update({
+          where: { id: existing.id },
+          data: {
+            aptId,
+            endAt: end,
+            status: "CONFIRMED",
+            openForPlayers: false,
+            reminderSentAt: null,
+            createdAt: new Date(),
+          },
+        });
+      }
+
       return tx.booking.create({
         data: { courtId: COURT_ID, aptId, startAt: start, endAt: end, status: "CONFIRMED" },
       });
