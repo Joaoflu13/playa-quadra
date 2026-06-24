@@ -77,10 +77,16 @@ espera, auto-cadastro e independência da administradora.
 
 ## 5. Roadmap (crescer junto com o condomínio)
 
-Mesmo sistema, novas áreas comuns por **+R$ 100/mês cada**:
-- Churrasqueira / espaço gourmet
-- Salão de festas
-- Outras quadras / academia / espaço pet
+Mesmo sistema, novas áreas comuns — cada uma com **suas próprias regras** (a churrasqueira e
+o salão não funcionam como a quadra, e o sistema se adapta a cada uma):
+
+| Plano | Inclui | Valor |
+|---|---|---|
+| Quadra (entrada) | Quadra de tênis | R$ 385/mês |
+| + Área avulsa | Churrasqueira **ou** salão | +R$ 100/mês cada |
+| **Ecossistema Completo** | Quadra + Churrasqueira + Salão | **R$ 540/mês** |
+
+Outras áreas possíveis: academia, espaço gourmet, quadra de futsal, espaço pet.
 
 ## 6. Por que agora
 
