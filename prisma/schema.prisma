@@ -182,7 +182,7 @@ model RuleConfig {
   slotMinutes        Int @default(60)
   openHour           Int @default(8)
   closeHour          Int @default(22)
-  advanceDays        Int @default(1)
+  advanceHours       Int @default(24) // janela de reserva em HORAS (ex.: 24 = pode reservar com até 24h de antecedência)
   maxActivePerApt    Int @default(2)
   maxWeeklyPerApt    Int @default(3)
   cancelMinNoticeMin Int @default(120)

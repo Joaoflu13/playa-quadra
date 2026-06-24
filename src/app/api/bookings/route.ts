@@ -87,10 +87,10 @@ export async function POST(req: NextRequest) {
   if (start <= now) {
     return NextResponse.json({ error: "Slot no passado" }, { status: 422 });
   }
-  const maxDate = new Date(now.getTime() + cfg.advanceDays * 86_400_000);
+  const maxDate = new Date(now.getTime() + cfg.advanceHours * 3_600_000);
   if (start > maxDate) {
     return NextResponse.json(
-      { error: `Antecedência máxima de ${cfg.advanceDays} dias` },
+      { error: `Antecedência máxima de ${cfg.advanceHours} horas` },
       { status: 422 }
     );
   }

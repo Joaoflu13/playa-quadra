@@ -73,7 +73,7 @@ export async function GET(req: NextRequest) {
     blocks.find((bl) => bl.startAt < e && bl.endAt > s) ?? null;
 
   const now = new Date();
-  const maxDate = new Date(now.getTime() + cfg.advanceDays * 86_400_000);
+  const maxDate = new Date(now.getTime() + cfg.advanceHours * 3_600_000);
 
   const grid = slots.map((start) => {
     const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
