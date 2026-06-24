@@ -42,10 +42,14 @@ da quadra pelo celular, com regras automáticas. **Já está em produção** em
 
 | Item | Valor |
 |---|---|
+| **Taxa de implantação** (única, na contratação) | **R$ 500** |
 | **Mensalidade — Quadra de Tênis** | **R$ 385/mês** (R$ 2,50/apê) |
 | Plano anual (à vista, ~10% de desconto) | **R$ 4.158/ano** |
 | Nova área comum (add-on) | **+R$ 100/mês** cada |
-| Hospedagem, implantação e cadastro dos moradores | **inclusos** |
+| Hospedagem e cadastro inicial dos moradores | **inclusos** |
+
+A **taxa de implantação** cobre a configuração inicial, o cadastro/pré-autorização dos
+moradores e a colocação do sistema em operação para o condomínio.
 
 **Tudo de manutenção incluso:** hospedagem, correção de erros, atualizações de segurança,
 ajuste das regras, cadastro/suporte ao síndico. (Detalhe no Anexo de Escopo.)

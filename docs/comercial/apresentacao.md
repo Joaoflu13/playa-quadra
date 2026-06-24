@@ -58,6 +58,7 @@ Deixe ele reclamar — o problema dele vende a solução. (WhatsApp, caderninho,
 **Mostrar:**
 | Item | Valor |
 |---|---|
+| Implantação (única) | **R$ 500** |
 | Mensalidade (quadra) | **R$ 385/mês** |
 | Custo por apartamento | **R$ 2,50/apê/mês** |
 | Anual à vista | R$ 4.158/ano |

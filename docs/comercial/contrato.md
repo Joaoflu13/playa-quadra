@@ -81,6 +81,10 @@ indisponibilidades causadas por terceiros (provedores de hospedagem/banco) ou fo
 com aviso prévio.
 
 ## Cláusula 5 — Preço, reajuste e pagamento
+5.0. **Taxa de implantação (única):** **R$ 500,00**, devida na contratação, cobrindo a
+configuração inicial do sistema, o cadastro/pré-autorização dos moradores e a colocação em
+operação. Não reembolsável após a conclusão da implantação.
+
 5.1. **Mensalidade de manutenção (quadra de tênis):** **R$ 385,00/mês** (equivalente a
 R$ 2,50 por apartamento, base de 154 unidades), cobrindo a Cláusula 2.
 
