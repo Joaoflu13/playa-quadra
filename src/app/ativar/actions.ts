@@ -4,13 +4,14 @@ import { redirect } from "next/navigation";
 import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { onlyDigits, isValidCpf } from "@/lib/cpf";
+import { cleanUnit } from "@/lib/availability";
 
 /**
- * Normaliza unidade para comparação tolerante: ignora maiúsculas, acentos,
- * espaços e pontuação. "Bloco A - 304" == "bloco a 304" == "BlocoA304".
+ * Normaliza unidade para comparação tolerante: remove "Bloco X", acentos,
+ * espaços e pontuação. "Bloco A - 304" == "bloco a 304" == "304".
  */
 function norm(s: string): string {
-  return (s ?? "")
+  return cleanUnit(s)
     .normalize("NFD") // separa acentos (ã -> a + diacrítico)
     .toLowerCase()
     .replace(/[^a-z0-9]/g, ""); // mantém só letras/números (tira acento, espaço, pontuação)

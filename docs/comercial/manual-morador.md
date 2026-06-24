@@ -5,7 +5,7 @@
 
 ## 1. Primeiro acesso (ativar sua conta)
 1. Toque em **"Primeiro acesso? Ative sua conta"**.
-2. Informe seu **CPF** + sua **unidade** (ex.: Bloco A - 304) e **crie sua senha**.
+2. Informe seu **CPF** + seu **apartamento** (ex.: 304) e **crie sua senha**.
 3. Pronto! Agora é só entrar com **CPF + senha**.
 
 > Esqueceu a senha depois? Toque em **"Esqueci minha senha"** ou fale com o síndico.

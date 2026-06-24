@@ -78,6 +78,7 @@ export default function BookingBoard() {
   const [busy, setBusy] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<string | null>(null);
+  const [confirmCancelId, setConfirmCancelId] = useState<string | null>(null);
 
   // silent=true: atualiza em segundo plano sem mostrar "Carregando…"
   const load = useCallback(
@@ -146,14 +147,12 @@ export default function BookingBoard() {
 
   const book = (startAt: string) =>
     api("/api/bookings", "POST", { startAt }, startAt);
-  const cancel = (id: string) => {
-    if (
-      !window.confirm(
-        "Cancelar esta reserva? O horário será liberado para os outros moradores."
-      )
-    )
-      return;
-    return api("/api/bookings", "DELETE", { id }, id);
+  // Cancelar abre um modal de confirmação (Sim/Não) em vez do confirm() nativo.
+  const cancel = (id: string) => setConfirmCancelId(id);
+  const doCancel = async () => {
+    const id = confirmCancelId;
+    setConfirmCancelId(null);
+    if (id) await api("/api/bookings", "DELETE", { id }, id);
   };
   // Jogo aberto (procurar parceiro sem reservar o horário).
   const openMatch = (startAt: string) =>
@@ -438,6 +437,25 @@ export default function BookingBoard() {
             </div>
           )}
         </section>
+      )}
+
+      {/* Modal de confirmação de cancelamento (Sim / Não) */}
+      {confirmCancelId && (
+        <div className="modal-overlay" onClick={() => setConfirmCancelId(null)}>
+          <div className="modal" onClick={(e) => e.stopPropagation()}>
+            <p style={{ marginTop: 0 }}>
+              Cancelar esta reserva? O horário será liberado para os outros moradores.
+            </p>
+            <div className="modal-actions">
+              <button className="btn btn-2" onClick={() => setConfirmCancelId(null)}>
+                Não
+              </button>
+              <button className="btn" onClick={doCancel}>
+                Sim, cancelar
+              </button>
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

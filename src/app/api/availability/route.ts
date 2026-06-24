@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { slotStartsForDate, COURT_ID, TZ_OFFSET } from "@/lib/availability";
+import { slotStartsForDate, COURT_ID, TZ_OFFSET, cleanUnit } from "@/lib/availability";
 
 /**
  * GET /api/availability?date=YYYY-MM-DD
@@ -81,7 +81,10 @@ export async function GET(req: NextRequest) {
   const now = new Date();
   const maxDate = new Date(now.getTime() + cfg.advanceHours * 3_600_000);
 
-  const withUnit = (label: string, unit: string) => (unit ? `${label} (${unit})` : label);
+  const withUnit = (label: string, unit: string) => {
+    const u = cleanUnit(unit);
+    return u ? `${label} (${u})` : label;
+  };
 
   const grid = slots.map((start) => {
     const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
@@ -123,10 +126,10 @@ export async function GET(req: NextRequest) {
       bookable,
       bookingId: b.id,
       ownerName: b.apartment.label,
-      ownerUnit: b.apartment.unit,
+      ownerUnit: cleanUnit(b.apartment.unit),
       ownerLabel: withUnit(b.apartment.label, b.apartment.unit),
       partnerName: hasPartner ? partner.apartment.label : null,
-      partnerUnit: hasPartner ? partner.apartment.unit : null,
+      partnerUnit: hasPartner ? cleanUnit(partner.apartment.unit) : null,
       partnerLabel: hasPartner ? withUnit(partner.apartment.label, partner.apartment.unit) : null,
       mine,
       iAmPartner,

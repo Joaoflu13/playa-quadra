@@ -5,6 +5,14 @@ export const TZ_OFFSET = "-03:00";
 export const COURT_ID = "court-1";
 
 /**
+ * Remove o prefixo "Bloco X - " da unidade (o Playa del Mago só tem um bloco).
+ * "Bloco A - 304" -> "304" · "Bloco A 101" -> "101" · "304" -> "304".
+ */
+export function cleanUnit(unit: string | null | undefined): string {
+  return (unit ?? "").replace(/^\s*bloco\s*[a-z]?\s*[-–—]?\s*/i, "").trim();
+}
+
+/**
  * Gera os horários de início dos slots de um dia (hora local de SP),
  * de openHour (inclusive) até closeHour (exclusivo).
  * Ex.: open=6, close=22 -> 06:00 ... 21:00 (último slot 21:00–22:00).

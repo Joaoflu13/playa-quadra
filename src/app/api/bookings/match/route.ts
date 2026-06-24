@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { COURT_ID } from "@/lib/availability";
+import { COURT_ID, cleanUnit } from "@/lib/availability";
 
 /**
  * "Jogo aberto" — procurar parceiro SEM reservar o horário.
@@ -164,7 +164,7 @@ export async function POST(req: NextRequest) {
         aptId: match.aptId,
         type: "MATCH_FILLED",
         bookingId: result.id,
-        message: `${me.label}${me.unit ? ` (${me.unit})` : ""} topou jogar com você. Quadra reservada para ${fmtSP(start)}!`,
+        message: `${me.label}${cleanUnit(me.unit) ? ` (${cleanUnit(me.unit)})` : ""} topou jogar com você. Quadra reservada para ${fmtSP(start)}!`,
       },
     });
     return NextResponse.json({ ok: true, booked: true });
