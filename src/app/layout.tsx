@@ -7,7 +7,7 @@ export const metadata: Metadata = {
   description: "Agendamento da quadra de tênis — Condomínio Playa del Mago, Barra da Tijuca",
   applicationName: "Quadra Playa",
   appleWebApp: { capable: true, title: "Quadra Playa", statusBarStyle: "default" },
-  icons: { icon: "/icon.svg", apple: "/icon.svg" },
+  icons: { icon: "/icon-192.png", apple: "/apple-icon.png" },
 };
 
 export const viewport: Viewport = {
