@@ -23,7 +23,6 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error: "Não autenticado" }, { status: 401 });
   }
   const viewerAptId = session.user.aptId as string;
-  const viewerIsAdmin = session.user.role === "ADMIN";
 
   const cfg = await getConfig();
   const slots = slotStartsForDate(date, cfg.openHour, cfg.closeHour);
@@ -114,16 +113,20 @@ export async function GET(req: NextRequest) {
     const partner = b.interests[0];
     const hasPartner = !!partner;
     const iAmPartner = !!viewerAptId && b.interests.some((i) => i.aptId === viewerAptId);
-    // Nomes visíveis: dono/síndico sempre; numa dupla (ambos consentiram), todos veem.
-    const canSee = mine || viewerIsAdmin || hasPartner;
 
+    // Nome + unidade de quem reservou ficam visíveis a todos os moradores logados
+    // (ex.: "João (Bloco A - 304)"), para o horário travado mostrar quem marcou.
     return {
       startAt: start.toISOString(),
       endAt: end.toISOString(),
       taken,
       bookable,
       bookingId: b.id,
-      ownerLabel: canSee ? withUnit(b.apartment.label, b.apartment.unit) : null,
+      ownerName: b.apartment.label,
+      ownerUnit: b.apartment.unit,
+      ownerLabel: withUnit(b.apartment.label, b.apartment.unit),
+      partnerName: hasPartner ? partner.apartment.label : null,
+      partnerUnit: hasPartner ? partner.apartment.unit : null,
       partnerLabel: hasPartner ? withUnit(partner.apartment.label, partner.apartment.unit) : null,
       mine,
       iAmPartner,

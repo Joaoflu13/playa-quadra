@@ -17,22 +17,30 @@
 | Cor/etiqueta | Significa |
 |---|---|
 | **Livre** | pode reservar |
-| **Ocupado** | já tem dono |
+| **Nome + apê** (ex.: "João A-304") | já reservado por esse morador |
+| **🎾 quer dupla** | alguém procura parceiro nesse horário (ainda livre — você pode entrar) |
 | **Sua reserva** (verde) | é a sua |
-| **Abre depois** | ainda fora da janela (reserva com até 24h de antecedência) |
+| **Abre depois** | ainda fora da janela de reserva |
 | **Indisponível** | quadra bloqueada (manutenção/torneio) |
 
 ## 3. Cancelar
 Em **"Minhas reservas"**, toque em **Cancelar** (até 2h antes). Cancele se não for jogar — **faltar bloqueia sua conta** por alguns dias.
 
-## 4. Achar parceiro e entrar na fila
-- **Procuro parceiros:** ao reservar, abra seu horário; quem tiver interesse aparece pra você.
-- **Lista de espera:** num horário ocupado, toque em **"Entrar na lista de espera"**. Se o dono cancelar, você é avisado e o **primeiro a reservar leva**.
+## 4. Jogar em dupla (procurar parceiro)
+Funciona como um **"jogo aberto"**, sem travar a quadra à toa:
+1. Num horário **livre**, toque em **"🎾 Procurar parceiro"**. O horário **não é reservado** ainda — fica livre, marcado como "quer dupla".
+2. Outro morador abre esse horário e toca em **"🙋 Eu quero (fechar a dupla)"**.
+3. Pronto: o horário **fecha e fica reservado para vocês dois**.
 
-## 5. O sininho 🔔 (no topo)
-Avisa quando: **alguém quer jogar** no seu horário, ou **uma vaga da lista de espera liberou**.
+> Enquanto ninguém entra, qualquer um ainda pode **reservar o horário sozinho** (e a procura cai). Você é avisado se isso acontecer.
 
-## 6. Instalar como aplicativo
+## 5. Lista de espera
+Num horário **já reservado**, toque em **"Entrar na lista de espera"**. Se o dono cancelar, você é avisado (🔔) e o **primeiro a reservar leva**.
+
+## 6. O sininho 🔔 (no topo)
+Avisa quando: **alguém fechou a dupla** com você, ou **uma vaga da lista de espera liberou**.
+
+## 7. Instalar como aplicativo
 - **iPhone (Safari):** toque no ícone **Compartilhar** (caixinha com seta) → **"Adicionar à Tela de Início"**.
 - **Android (Chrome):** toque em **Instalar** quando o aviso aparecer.
 

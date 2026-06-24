@@ -11,7 +11,11 @@ type Slot = {
   blockReason?: string | null;
   bookingId?: string;
   ownerLabel?: string | null;
+  ownerName?: string | null;
+  ownerUnit?: string | null;
   partnerLabel?: string | null;
+  partnerName?: string | null;
+  partnerUnit?: string | null;
   mine?: boolean;
   iAmPartner?: boolean;
   openMatch?: boolean;
@@ -249,8 +253,10 @@ export default function BookingBoard() {
                   >
                     {hhmm(s.startAt)}
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
-                      {s.ownerLabel ? shortLabel(s.ownerLabel) : "ocupado"}
-                      {s.partnerLabel ? " + " + shortLabel(s.partnerLabel) : ""}
+                      {s.ownerName
+                        ? shortLabel(s.ownerName) + (s.ownerUnit ? " " + s.ownerUnit : "")
+                        : "ocupado"}
+                      {s.partnerName ? " + " + shortLabel(s.partnerName) : ""}
                       {s.iAmWaiting ? " · na fila" : ""}
                     </div>
                   </button>
