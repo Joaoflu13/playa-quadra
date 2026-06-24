@@ -4,6 +4,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
 import { COURT_ID, cleanUnit, isValidCourt, courtLabel } from "@/lib/availability";
+import { reportError } from "@/lib/observability";
 
 /**
  * "Jogo aberto" — procurar parceiro SEM reservar o horário.
@@ -175,7 +176,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Slot acabou de ser reservado" }, { status: 409 });
     }
     if (e instanceof RuleError) return NextResponse.json({ error: e.message }, { status: 409 });
-    console.error(e);
+    await reportError("POST /api/bookings/match (join)", e, { aptId, courtId });
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }

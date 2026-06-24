@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
 import { COURT_ID, TZ_OFFSET, isValidCourt, courtLabel } from "@/lib/availability";
 import { sendBookingConfirmation } from "@/lib/mail";
+import { reportError } from "@/lib/observability";
 
 /**
  * GET /api/bookings
@@ -223,7 +224,7 @@ export async function POST(req: NextRequest) {
     if (e instanceof RuleError) {
       return NextResponse.json({ error: e.message, code: e.code }, { status: 422 });
     }
-    console.error(e);
+    await reportError("POST /api/bookings", e, { aptId, courtId });
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }

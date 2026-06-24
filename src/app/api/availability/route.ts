@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
 import { slotStartsForDate, COURT_ID, TZ_OFFSET, cleanUnit, isValidCourt } from "@/lib/availability";
+import { reportError } from "@/lib/observability";
 
 /**
  * GET /api/availability?date=YYYY-MM-DD
@@ -75,7 +76,7 @@ export async function GET(req: NextRequest) {
     });
   } catch (e) {
     // Tabela ainda não migrada? Não derruba a grade.
-    console.error("availability: OpenMatch indisponível", e);
+    void reportError("availability: OpenMatch indisponível", e, { courtId, date });
   }
   const matchByStart = new Map(openMatches.map((m) => [m.startAt.getTime(), m]));
 
