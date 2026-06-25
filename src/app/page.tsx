@@ -47,6 +47,7 @@ export default async function HomePage() {
       </div>
       <AreaReveal courtId="court-1" title="Quadra de Tênis" withPhoto allowMatch />
       <AreaReveal courtId="court-2" title="Mesa de Sinuca" emoji="🎱" allowMatch={false} />
+      <AreaReveal courtId="court-3" title="Sala de Pilates" emoji="🧘" allowMatch={false} />
       </div>
     </main>
   );

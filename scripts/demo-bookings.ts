@@ -65,8 +65,8 @@ async function main() {
   }
 
   // 1) Maria 19h — pula se o slot já estiver ocupado.
-  const slot19 = await prisma.booking.findUnique({
-    where: { courtId_startAt: { courtId: "court-1", startAt: at(19) } },
+  const slot19 = await prisma.booking.findFirst({
+    where: { courtId: "court-1", startAt: at(19), status: "CONFIRMED" },
   });
   if (!slot19) {
     await prisma.booking.create({
@@ -75,8 +75,8 @@ async function main() {
   }
 
   // 2) João 20h aberto p/ parceiros — pula se já ocupado.
-  let joaoBk = await prisma.booking.findUnique({
-    where: { courtId_startAt: { courtId: "court-1", startAt: at(20) } },
+  let joaoBk = await prisma.booking.findFirst({
+    where: { courtId: "court-1", startAt: at(20), status: "CONFIRMED" },
   });
   if (!joaoBk) {
     joaoBk = await prisma.booking.create({

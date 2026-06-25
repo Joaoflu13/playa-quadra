@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { slotStartsForDate, COURT_ID, TZ_OFFSET, cleanUnit, isValidCourt } from "@/lib/availability";
+import { slotStartsForDate, COURT_ID, TZ_OFFSET, cleanUnit, isValidCourt, courtSettings } from "@/lib/availability";
 import { reportError } from "@/lib/observability";
 
 /**
@@ -29,7 +29,8 @@ export async function GET(req: NextRequest) {
   const courtId = isValidCourt(courtParam) ? (courtParam as string) : COURT_ID;
 
   const cfg = await getConfig();
-  const slots = slotStartsForDate(date, cfg.openHour, cfg.closeHour);
+  const settings = courtSettings(courtId, cfg);
+  const slots = slotStartsForDate(date, settings.openHour, settings.closeHour);
 
   const dayStart = new Date(`${date}T00:00:00${TZ_OFFSET}`);
   const dayEnd = new Date(dayStart.getTime() + 86_400_000);
@@ -51,7 +52,16 @@ export async function GET(req: NextRequest) {
       },
     },
   });
-  const byStart = new Map(booked.map((b) => [b.startAt.getTime(), b]));
+  // Agrupa por horário: áreas com capacidade > 1 (Pilates) têm várias reservas
+  // no mesmo slot. Áreas de capacidade 1 (tênis/sinuca) têm no máximo uma.
+  type Booked = (typeof booked)[number];
+  const groupByStart = new Map<number, Booked[]>();
+  for (const b of booked) {
+    const k = b.startAt.getTime();
+    const arr = groupByStart.get(k) ?? [];
+    arr.push(b);
+    groupByStart.set(k, arr);
+  }
 
   // Lista de espera do dia, agregada por horário (contagem + se o viewer está nela).
   const waits = await prisma.waitlist.findMany({
@@ -96,9 +106,42 @@ export async function GET(req: NextRequest) {
     return u ? `${label} (${u})` : label;
   };
 
+  const capacity = settings.capacity;
+
   const grid = slots.map((start) => {
     const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
-    const b = byStart.get(start.getTime());
+    const group = groupByStart.get(start.getTime()) ?? [];
+
+    // ---------- ÁREAS COM CAPACIDADE > 1 (ex.: Sala de Pilates) ----------
+    if (capacity > 1) {
+      const confirmedCount = group.length;
+      const full = confirmedCount >= capacity;
+      const mineBooking = group.find((b) => b.aptId === viewerAptId);
+      const mine = !!mineBooking;
+      const block = group.length === 0 ? blockFor(start, end) : null;
+      const bookable = !mine && !full && !block && start > now && start <= maxDate;
+
+      return {
+        startAt: start.toISOString(),
+        endAt: end.toISOString(),
+        taken: full,
+        bookable,
+        blocked: !!block,
+        blockReason: block?.reason ?? null,
+        capacity,
+        confirmedCount,
+        spotsLeft: Math.max(0, capacity - confirmedCount),
+        mine,
+        bookingId: mineBooking?.id,
+        // Quem já ocupa o horário (visível aos moradores logados, como nas demais áreas).
+        occupants: group.map((b) => withUnit(b.apartment.label, b.apartment.unit)),
+        waitlistCount: waitByStart.get(start.getTime())?.count ?? 0,
+        iAmWaiting: waitByStart.get(start.getTime())?.mine ?? false,
+      };
+    }
+
+    // ---------- ÁREAS COM CAPACIDADE 1 (tênis, sinuca) ----------
+    const b = group[0];
     const taken = !!b;
     const block = !b ? blockFor(start, end) : null;
     const bookable = !taken && !block && start > now && start <= maxDate;

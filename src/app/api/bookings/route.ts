@@ -3,10 +3,16 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { COURT_ID, TZ_OFFSET, isValidCourt, courtLabel } from "@/lib/availability";
+import { COURT_ID, TZ_OFFSET, isValidCourt, courtLabel, courtSettings } from "@/lib/availability";
 import { sendBookingConfirmation } from "@/lib/mail";
 import { reportError } from "@/lib/observability";
-import { validateSlot, findBlockReason, upsertConfirmedBooking, SlotTakenError } from "@/lib/booking";
+import {
+  validateSlot,
+  findBlockReason,
+  upsertConfirmedBooking,
+  SlotTakenError,
+  AlreadyBookedError,
+} from "@/lib/booking";
 
 /**
  * GET /api/bookings
@@ -67,11 +73,16 @@ export async function POST(req: NextRequest) {
   const courtId = isValidCourt(body.courtId) ? (body.courtId as string) : COURT_ID;
 
   const cfg = await getConfig();
+  const settings = courtSettings(courtId, cfg);
   const start = new Date(body.startAt);
   const now = new Date();
 
-  // Validação de slot (alinhamento, janela operacional, antecedência).
-  const slotErr = validateSlot(start, cfg, now);
+  // Validação de slot (alinhamento, janela própria da área, antecedência).
+  const slotErr = validateSlot(
+    start,
+    { ...cfg, openHour: settings.openHour, closeHour: settings.closeHour },
+    now
+  );
   if (slotErr) {
     const status = slotErr === "startAt inválido" ? 400 : 422;
     return NextResponse.json({ error: slotErr }, { status });
@@ -122,8 +133,8 @@ export async function POST(req: NextRequest) {
         throw new RuleError("MAX_WEEKLY", `Limite de ${cfg.maxWeeklyPerApt} reservas em 7 dias`);
       }
 
-      // Cria a reserva (reaproveitando a linha cancelada do slot, se houver).
-      return upsertConfirmedBooking(tx, { courtId, aptId, start, end });
+      // Cria a reserva respeitando a capacidade da área (reaproveita linha cancelada).
+      return upsertConfirmedBooking(tx, { courtId, aptId, start, end, capacity: settings.capacity });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     // Confirmação por e-mail (só se o morador tiver e-mail cadastrado). Não
@@ -156,8 +167,11 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(booking, { status: 201 });
   } catch (e) {
-    // Slot já confirmado (detectado dentro da transação pelo upsert).
+    // Slot cheio / o próprio morador já reservou (detectado na transação).
     if (e instanceof SlotTakenError) {
+      return NextResponse.json({ error: e.message }, { status: 409 });
+    }
+    if (e instanceof AlreadyBookedError) {
       return NextResponse.json({ error: e.message }, { status: 409 });
     }
     // Slot tomado por outra unidade entre a checagem e o insert

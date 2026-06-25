@@ -50,42 +50,61 @@ export async function findBlockReason(
   return block?.reason ?? null;
 }
 
-/** Sinaliza que o slot já está confirmado por outra reserva (corrida perdida). */
+/** Slot sem vaga (cheio) — corrida perdida ou capacidade esgotada. */
 export class SlotTakenError extends Error {
+  constructor(message = "Slot acabou de ser reservado") {
+    super(message);
+  }
+}
+
+/** O próprio morador já tem esse horário reservado. */
+export class AlreadyBookedError extends Error {
   constructor() {
-    super("Slot acabou de ser reservado");
+    super("Você já reservou este horário");
   }
 }
 
 /**
- * Cria (ou confirma) a reserva de um slot DENTRO de uma transação.
+ * Cria (ou confirma) a reserva de um slot DENTRO de uma transação, respeitando
+ * a CAPACIDADE da área (vagas por horário; default 1).
  *
- * A trava @@unique([courtId, startAt]) vale para QUALQUER status, então uma
- * reserva CANCELLED ainda ocupa a linha do slot. Para permitir remarcar um
- * horário cancelado, reaproveitamos a linha existente em vez de criar outra
- * (o que estouraria a unique). Se a linha já está CONFIRMED, lança SlotTakenError.
+ * Integridade:
+ *  - Conta as reservas CONFIRMED do slot; se já atingiu a capacidade, lança
+ *    SlotTakenError. Sob isolamento Serializable, duas reservas concorrentes
+ *    para a última vaga geram conflito de serialização (P2034) — uma é abortada.
+ *  - A trava @@unique([courtId, startAt, aptId]) vale para QUALQUER status, então
+ *    uma reserva CANCELLED do próprio morador ainda ocupa a linha. Para remarcar,
+ *    reaproveitamos essa linha em vez de criar outra (o que estouraria a unique).
  *
- * NÃO valida limites/janela/bloqueio — isso é responsabilidade do chamador,
- * que conhece as regras específicas do seu fluxo (quem conta o limite, etc.).
+ * NÃO valida limites/janela/bloqueio — isso é responsabilidade do chamador.
  */
 export async function upsertConfirmedBooking(
   tx: Prisma.TransactionClient,
-  params: { courtId: string; aptId: string; start: Date; end: Date }
+  params: { courtId: string; aptId: string; start: Date; end: Date; capacity?: number }
 ) {
-  const { courtId, aptId, start, end } = params;
+  const { courtId, aptId, start, end, capacity = 1 } = params;
 
-  const existing = await tx.booking.findUnique({
-    where: { courtId_startAt: { courtId, startAt: start } },
+  // Capacidade: quantas vagas confirmadas o slot já tem?
+  const confirmed = await tx.booking.count({
+    where: { courtId, startAt: start, status: "CONFIRMED" },
+  });
+  if (confirmed >= capacity) {
+    throw new SlotTakenError(
+      capacity > 1 ? "Horário lotado" : "Slot acabou de ser reservado"
+    );
+  }
+
+  // Linha própria do slot (a unique é por morador). Reaproveita se cancelada.
+  const mine = await tx.booking.findUnique({
+    where: { courtId_startAt_aptId: { courtId, startAt: start, aptId } },
   });
 
-  if (existing) {
-    if (existing.status === "CONFIRMED") throw new SlotTakenError();
-    // Limpa "procuro parceiros" antigo preso na linha cancelada.
-    await tx.joinInterest.deleteMany({ where: { bookingId: existing.id } });
+  if (mine) {
+    if (mine.status === "CONFIRMED") throw new AlreadyBookedError();
+    await tx.joinInterest.deleteMany({ where: { bookingId: mine.id } });
     return tx.booking.update({
-      where: { id: existing.id },
+      where: { id: mine.id },
       data: {
-        aptId,
         endAt: end,
         status: "CONFIRMED",
         openForPlayers: false,

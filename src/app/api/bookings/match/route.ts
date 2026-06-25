@@ -5,7 +5,7 @@ import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
 import { COURT_ID, cleanUnit, isValidCourt, courtLabel } from "@/lib/availability";
 import { reportError } from "@/lib/observability";
-import { validateSlot, findBlockReason, upsertConfirmedBooking, SlotTakenError } from "@/lib/booking";
+import { validateSlot, findBlockReason, upsertConfirmedBooking, SlotTakenError, AlreadyBookedError } from "@/lib/booking";
 
 /**
  * "Jogo aberto" — procurar parceiro SEM reservar o horário.
@@ -135,7 +135,7 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ ok: true, booked: true });
   } catch (e) {
-    if (e instanceof SlotTakenError) {
+    if (e instanceof SlotTakenError || e instanceof AlreadyBookedError) {
       return NextResponse.json({ error: e.message }, { status: 409 });
     }
     if (e instanceof Prisma.PrismaClientKnownRequestError && (e.code === "P2002" || e.code === "P2034")) {
