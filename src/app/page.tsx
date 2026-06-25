@@ -52,10 +52,18 @@ export default async function HomePage() {
         withPhoto
         photoSrc="/sinuca.jpg"
         photoAlt="Mesa de sinuca do Playa del Mago"
-        photoObjectPosition="center 50%"
+        photoObjectPosition="center 65%"
         allowMatch={false}
       />
-      <AreaReveal courtId="court-3" title="Sala de Pilates" emoji="🧘" allowMatch={false} />
+      <AreaReveal
+        courtId="court-3"
+        title="Sala de Pilates"
+        withPhoto
+        photoSrc="/pilates.jpg"
+        photoAlt="Sala de pilates do Playa del Mago"
+        photoObjectPosition="center 38%"
+        allowMatch={false}
+      />
       </div>
     </main>
   );
