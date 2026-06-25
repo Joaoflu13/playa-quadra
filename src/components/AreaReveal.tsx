@@ -6,21 +6,28 @@ import CourtPhoto from "./CourtPhoto";
 
 /**
  * Cabeçalho clicável de uma área comum que revela a grade de horários dela.
- * - `withPhoto`: usa a foto da quadra (hero) como cabeçalho (quadra de tênis).
- * - sem foto: mostra uma barra com o nome da área (ex.: 🎱 Mesa de Sinuca).
- * - `allowMatch`: liga/desliga o "procurar parceiro" (sinuca não usa).
+ * - `withPhoto`: usa uma foto (hero) como cabeçalho. `photoSrc`/`photoAlt`/
+ *   `photoObjectPosition` escolhem a imagem (default = foto da quadra de tênis).
+ * - sem foto: mostra uma barra com o nome da área (ex.: 🧘 Sala de Pilates).
+ * - `allowMatch`: liga/desliga o "procurar parceiro" (só o tênis usa).
  */
 export default function AreaReveal({
   courtId,
   title,
   emoji,
   withPhoto = false,
+  photoSrc,
+  photoAlt,
+  photoObjectPosition,
   allowMatch = true,
 }: {
   courtId: string;
   title: string;
   emoji?: string;
   withPhoto?: boolean;
+  photoSrc?: string;
+  photoAlt?: string;
+  photoObjectPosition?: string;
   allowMatch?: boolean;
 }) {
   const [open, setOpen] = useState(false);
@@ -42,7 +49,13 @@ export default function AreaReveal({
         style={{ cursor: "pointer" }}
       >
         {withPhoto ? (
-          <CourtPhoto hint={open ? "Toque para recolher ▴" : "Toque para ver os horários ▾"} />
+          <CourtPhoto
+            src={photoSrc}
+            alt={photoAlt}
+            title={photoSrc ? title : undefined}
+            objectPosition={photoObjectPosition}
+            hint={open ? "Toque para recolher ▴" : "Toque para ver os horários ▾"}
+          />
         ) : (
           <div className="area-header">
             <span className="area-header__title">
