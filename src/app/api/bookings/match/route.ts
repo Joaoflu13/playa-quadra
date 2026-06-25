@@ -5,6 +5,7 @@ import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
 import { COURT_ID, cleanUnit, isValidCourt, courtLabel } from "@/lib/availability";
 import { reportError } from "@/lib/observability";
+import { validateSlot, findBlockReason, upsertConfirmedBooking, SlotTakenError } from "@/lib/booking";
 
 /**
  * "Jogo aberto" — procurar parceiro SEM reservar o horário.
@@ -15,18 +16,6 @@ import { reportError } from "@/lib/observability";
  *  DELETE /api/bookings/match  { startAt, courtId? }                  -> cancela a própria procura
  */
 
-type Cfg = Awaited<ReturnType<typeof getConfig>>;
-
-function hourSP(d: Date): number {
-  return Number(
-    new Intl.DateTimeFormat("pt-BR", {
-      hour: "2-digit",
-      hour12: false,
-      timeZone: "America/Sao_Paulo",
-    }).format(d)
-  );
-}
-
 function fmtSP(d: Date): string {
   return new Intl.DateTimeFormat("pt-BR", {
     timeZone: "America/Sao_Paulo",
@@ -36,19 +25,6 @@ function fmtSP(d: Date): string {
     hour: "2-digit",
     minute: "2-digit",
   }).format(d);
-}
-
-/** Valida que o horário é um slot operacional e dentro da janela de reserva. */
-function validateSlot(start: Date, cfg: Cfg): string | null {
-  if (Number.isNaN(start.getTime())) return "startAt inválido";
-  if (start.getUTCMinutes() !== 0) return "Slots começam na hora cheia";
-  const h = hourSP(start);
-  if (h < cfg.openHour || h >= cfg.closeHour) return "Fora da janela operacional";
-  const now = new Date();
-  if (start <= now) return "Slot no passado";
-  const maxDate = new Date(now.getTime() + cfg.advanceHours * 3_600_000);
-  if (start > maxDate) return `Antecedência máxima de ${cfg.advanceHours} horas`;
-  return null;
 }
 
 export async function POST(req: NextRequest) {
@@ -69,12 +45,9 @@ export async function POST(req: NextRequest) {
   const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
 
   // Área bloqueada pelo síndico?
-  const block = await prisma.courtBlock.findFirst({
-    where: { courtId, startAt: { lt: end }, endAt: { gt: start } },
-    select: { reason: true },
-  });
-  if (block) {
-    return NextResponse.json({ error: `Área indisponível: ${block.reason}` }, { status: 422 });
+  const blockReason = await findBlockReason(courtId, start, end);
+  if (blockReason) {
+    return NextResponse.json({ error: `Área indisponível: ${blockReason}` }, { status: 422 });
   }
 
   const me = await prisma.apartment.findUnique({ where: { id: aptId } });
@@ -136,23 +109,13 @@ export async function POST(req: NextRequest) {
 
   try {
     const result = await prisma.$transaction(async (tx) => {
-      // Reaproveita linha cancelada do mesmo slot, se houver (a unique impede 2 linhas).
-      const existing = await tx.booking.findUnique({
-        where: { courtId_startAt: { courtId, startAt: start } },
+      // A reserva fica no nome de quem ABRIU a procura (match.aptId).
+      const booking = await upsertConfirmedBooking(tx, {
+        courtId,
+        aptId: match.aptId,
+        start,
+        end,
       });
-      let booking;
-      if (existing) {
-        if (existing.status === "CONFIRMED") throw new RuleError("Slot acabou de ser reservado");
-        await tx.joinInterest.deleteMany({ where: { bookingId: existing.id } });
-        booking = await tx.booking.update({
-          where: { id: existing.id },
-          data: { aptId: match.aptId, endAt: end, status: "CONFIRMED", openForPlayers: false, reminderSentAt: null, createdAt: new Date() },
-        });
-      } else {
-        booking = await tx.booking.create({
-          data: { courtId, aptId: match.aptId, startAt: start, endAt: end, status: "CONFIRMED" },
-        });
-      }
       // Registra o parceiro (quem clicou "Eu quero") como JoinInterest da reserva.
       await tx.joinInterest.create({ data: { bookingId: booking.id, aptId } });
       // Some a procura.
@@ -172,10 +135,12 @@ export async function POST(req: NextRequest) {
     });
     return NextResponse.json({ ok: true, booked: true });
   } catch (e) {
+    if (e instanceof SlotTakenError) {
+      return NextResponse.json({ error: e.message }, { status: 409 });
+    }
     if (e instanceof Prisma.PrismaClientKnownRequestError && (e.code === "P2002" || e.code === "P2034")) {
       return NextResponse.json({ error: "Slot acabou de ser reservado" }, { status: 409 });
     }
-    if (e instanceof RuleError) return NextResponse.json({ error: e.message }, { status: 409 });
     await reportError("POST /api/bookings/match (join)", e, { aptId, courtId });
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
@@ -195,5 +160,3 @@ export async function DELETE(req: NextRequest) {
   await prisma.openMatch.deleteMany({ where: { courtId, startAt: start, aptId } });
   return NextResponse.json({ ok: true, open: false });
 }
-
-class RuleError extends Error {}
