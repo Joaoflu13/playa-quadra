@@ -3,8 +3,16 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/db";
 import { auth } from "@/lib/auth";
 import { getConfig } from "@/lib/rules";
-import { COURT_ID, TZ_OFFSET, isValidCourt } from "@/lib/availability";
+import { COURT_ID, TZ_OFFSET, isValidCourt, courtLabel, courtSettings } from "@/lib/availability";
 import { sendBookingConfirmation } from "@/lib/mail";
+import { reportError } from "@/lib/observability";
+import {
+  validateSlot,
+  findBlockReason,
+  upsertConfirmedBooking,
+  SlotTakenError,
+  AlreadyBookedError,
+} from "@/lib/booking";
 
 /**
  * GET /api/bookings
@@ -65,51 +73,27 @@ export async function POST(req: NextRequest) {
   const courtId = isValidCourt(body.courtId) ? (body.courtId as string) : COURT_ID;
 
   const cfg = await getConfig();
+  const settings = courtSettings(courtId, cfg);
   const start = new Date(body.startAt);
-  if (Number.isNaN(start.getTime())) {
-    return NextResponse.json({ error: "startAt inválido" }, { status: 400 });
-  }
-
-  // --- Validações de janela/alinhamento (em horário local de SP) ---
-  const local = new Date(start.getTime()); // start já carrega offset -03:00
-  const minutes = local.getUTCMinutes();
-  const hourLocal = Number(
-    new Intl.DateTimeFormat("pt-BR", {
-      hour: "2-digit", hour12: false, timeZone: "America/Sao_Paulo",
-    }).format(start)
-  );
-
-  if (minutes !== 0) {
-    return NextResponse.json({ error: "Slots começam na hora cheia" }, { status: 422 });
-  }
-  if (hourLocal < cfg.openHour || hourLocal >= cfg.closeHour) {
-    return NextResponse.json({ error: "Fora da janela operacional" }, { status: 422 });
-  }
-
   const now = new Date();
-  if (start <= now) {
-    return NextResponse.json({ error: "Slot no passado" }, { status: 422 });
-  }
-  const maxDate = new Date(now.getTime() + cfg.advanceHours * 3_600_000);
-  if (start > maxDate) {
-    return NextResponse.json(
-      { error: `Antecedência máxima de ${cfg.advanceHours} horas` },
-      { status: 422 }
-    );
+
+  // Validação de slot (alinhamento, janela própria da área, antecedência).
+  const slotErr = validateSlot(
+    start,
+    { ...cfg, openHour: settings.openHour, closeHour: settings.closeHour },
+    now
+  );
+  if (slotErr) {
+    const status = slotErr === "startAt inválido" ? 400 : 422;
+    return NextResponse.json({ error: slotErr }, { status });
   }
 
   const end = new Date(start.getTime() + cfg.slotMinutes * 60_000);
 
-  // Quadra bloqueada pelo síndico (manutenção/torneio) neste intervalo?
-  const block = await prisma.courtBlock.findFirst({
-    where: { courtId, startAt: { lt: end }, endAt: { gt: start } },
-    select: { reason: true },
-  });
-  if (block) {
-    return NextResponse.json(
-      { error: `Quadra indisponível: ${block.reason}` },
-      { status: 422 }
-    );
+  // Área bloqueada pelo síndico (manutenção/torneio) neste intervalo?
+  const blockReason = await findBlockReason(courtId, start, end);
+  if (blockReason) {
+    return NextResponse.json({ error: `Área indisponível: ${blockReason}` }, { status: 422 });
   }
 
   try {
@@ -149,34 +133,8 @@ export async function POST(req: NextRequest) {
         throw new RuleError("MAX_WEEKLY", `Limite de ${cfg.maxWeeklyPerApt} reservas em 7 dias`);
       }
 
-      // A trava @@unique([courtId, startAt]) vale para QUALQUER status, então uma
-      // reserva CANCELLED ainda ocupa o slot no banco. Para permitir remarcar um
-      // horário cancelado, reaproveitamos a linha existente em vez de criar outra.
-      const existing = await tx.booking.findUnique({
-        where: { courtId_startAt: { courtId, startAt: start } },
-      });
-      if (existing) {
-        if (existing.status === "CONFIRMED") {
-          throw new RuleError("SLOT_TAKEN", "Slot acabou de ser reservado");
-        }
-        // Limpa "procuro parceiros" antigo que ficou preso na linha cancelada.
-        await tx.joinInterest.deleteMany({ where: { bookingId: existing.id } });
-        return tx.booking.update({
-          where: { id: existing.id },
-          data: {
-            aptId,
-            endAt: end,
-            status: "CONFIRMED",
-            openForPlayers: false,
-            reminderSentAt: null,
-            createdAt: new Date(),
-          },
-        });
-      }
-
-      return tx.booking.create({
-        data: { courtId, aptId, startAt: start, endAt: end, status: "CONFIRMED" },
-      });
+      // Cria a reserva respeitando a capacidade da área (reaproveita linha cancelada).
+      return upsertConfirmedBooking(tx, { courtId, aptId, start, end, capacity: settings.capacity });
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     // Confirmação por e-mail (só se o morador tiver e-mail cadastrado). Não
@@ -209,6 +167,13 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json(booking, { status: 201 });
   } catch (e) {
+    // Slot cheio / o próprio morador já reservou (detectado na transação).
+    if (e instanceof SlotTakenError) {
+      return NextResponse.json({ error: e.message }, { status: 409 });
+    }
+    if (e instanceof AlreadyBookedError) {
+      return NextResponse.json({ error: e.message }, { status: 409 });
+    }
     // Slot tomado por outra unidade entre a checagem e o insert
     if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === "P2002") {
       return NextResponse.json({ error: "Slot acabou de ser reservado" }, { status: 409 });
@@ -223,7 +188,7 @@ export async function POST(req: NextRequest) {
     if (e instanceof RuleError) {
       return NextResponse.json({ error: e.message, code: e.code }, { status: 422 });
     }
-    console.error(e);
+    await reportError("POST /api/bookings", e, { aptId, courtId });
     return NextResponse.json({ error: "Erro interno" }, { status: 500 });
   }
 }
@@ -309,7 +274,7 @@ export async function DELETE(req: NextRequest) {
       data: waiters.map((w) => ({
         aptId: w.aptId,
         type: "WAITLIST_OPEN",
-        message: `A vaga da quadra de ${quando} liberou! Entre no app e reserve antes que acabe.`,
+        message: `Vaga liberada — ${courtLabel(booking.courtId)} às ${quando}. Entre no app e reserve antes que acabe.`,
       })),
     });
     await prisma.waitlist.deleteMany({

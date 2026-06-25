@@ -19,21 +19,21 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         if (!cpf || !password) return null;
 
         // Anti força-bruta: bloqueia o CPF após tentativas erradas demais.
-        if (isLocked(cpf)) return null;
+        if (await isLocked(cpf)) return null;
 
         const apt = await prisma.apartment.findUnique({ where: { cpf } });
         if (!apt) {
-          registerFailure(cpf);
+          await registerFailure(cpf);
           return null;
         }
 
         const ok = await bcrypt.compare(password, apt.passwordHash);
         if (!ok) {
-          registerFailure(cpf);
+          await registerFailure(cpf);
           return null;
         }
 
-        clearFailures(cpf);
+        await clearFailures(cpf);
         // O "name" exibido é o nome do morador.
         return { id: apt.id, email: apt.email ?? undefined, name: apt.label, role: apt.role };
       },

@@ -20,7 +20,7 @@ export default async function LoginPage({
     const cpfDigits = onlyDigits(String(formData.get("cpf") ?? ""));
     // Anti força-bruta: se o CPF está bloqueado, avisa em vez de dizer
     // genericamente "senha inválida" (foi o que mais confundiu no uso real).
-    if (cpfDigits && isLocked(cpfDigits)) {
+    if (cpfDigits && await isLocked(cpfDigits)) {
       redirect("/login?error=locked");
     }
     try {
@@ -32,7 +32,7 @@ export default async function LoginPage({
     } catch (e) {
       if (e instanceof AuthError) {
         // Esta tentativa pode ter sido a que estourou o limite.
-        if (cpfDigits && isLocked(cpfDigits)) redirect("/login?error=locked");
+        if (cpfDigits && await isLocked(cpfDigits)) redirect("/login?error=locked");
         redirect("/login?error=1");
       }
       throw e; // redirect() lança internamente; deixe propagar.

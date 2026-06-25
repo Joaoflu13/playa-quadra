@@ -5,6 +5,10 @@ import bcrypt from "bcryptjs";
 import { prisma } from "@/lib/db";
 import { onlyDigits, isValidCpf } from "@/lib/cpf";
 import { cleanUnit } from "@/lib/availability";
+import { isLocked, registerFailure, clearFailures } from "@/lib/rateLimit";
+
+// Namespace separado do login para não bloquear os dois com a mesma contagem.
+const NS = "ativar:";
 
 /**
  * Normaliza unidade para comparação tolerante: remove "Bloco X", acentos,
@@ -32,10 +36,14 @@ export async function activateAccount(form: FormData) {
   if (next.length < 6) redirect("/ativar?status=short");
   if (next !== confirm) redirect("/ativar?status=mismatch");
 
+  // Anti força-bruta: bloqueia o CPF após tentativas erradas demais.
+  if (await isLocked(NS + cpf)) redirect("/ativar?status=locked");
+
   const apt = await prisma.apartment.findUnique({ where: { cpf } });
 
   // Anti-enumeração: CPF inexistente e unidade errada dão a mesma mensagem.
   if (!apt || norm(apt.unit) !== norm(unit)) {
+    await registerFailure(NS + cpf);
     redirect("/ativar?status=nomatch");
   }
   // Já ativada: não deixa um terceiro "reativar" (resetar) a conta.
@@ -54,5 +62,6 @@ export async function activateAccount(form: FormData) {
     },
   });
 
+  await clearFailures(NS + cpf);
   redirect("/login?activated=1");
 }

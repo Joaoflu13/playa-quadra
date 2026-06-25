@@ -172,8 +172,13 @@ model Booking {
   openForPlayers Boolean   @default(false)
   interests JoinInterest[]
 
-  // Trava de integridade: nunca duas reservas no mesmo slot da mesma quadra.
-  @@unique([courtId, startAt])
+  // Trava de integridade: um morador não reserva o mesmo slot duas vezes.
+  // Áreas com capacidade > 1 (ex.: Sala de Pilates, 2 vagas) admitem vários
+  // moradores no mesmo slot; o limite de vagas é validado na transação
+  // (count sob isolamento Serializable). Áreas de capacidade 1 (tênis, sinuca)
+  // ficam efetivamente com 1 reserva por slot por causa desse mesmo count.
+  @@unique([courtId, startAt, aptId])
+  @@index([courtId, startAt])
   @@index([aptId, startAt])
   @@index([startAt])
 }
@@ -203,6 +208,16 @@ model RuleConfig {
   maxWeeklyPerApt    Int @default(3)
   cancelMinNoticeMin Int @default(120)
   noShowBlockDays    Int @default(7) // dias de bloqueio por falta
+}
+
+/// Controle de tentativas de login/ativação — substitui o Map in-memory do rateLimit.ts.
+/// Chave: namespace + identificador (ex.: "login:12345678900", "ativar:12345678900").
+/// Persiste entre restarts e é compartilhado entre instâncias serverless.
+model RateLimit {
+  key         String    @id          // namespace:cpf
+  fails       Int       @default(0)
+  firstAt     DateTime
+  lockedUntil DateTime?
 }
 
 /// V1 — rastreio de no-show / late-cancel para suspensão automática.

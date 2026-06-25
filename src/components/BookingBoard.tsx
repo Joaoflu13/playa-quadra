@@ -23,6 +23,11 @@ type Slot = {
   openMatchMine?: boolean;
   waitlistCount?: number;
   iAmWaiting?: boolean;
+  // Áreas com capacidade > 1 (ex.: Sala de Pilates).
+  capacity?: number;
+  confirmedCount?: number;
+  spotsLeft?: number;
+  occupants?: string[];
 };
 
 type MyBooking = { id: string; startAt: string; endAt: string };
@@ -232,6 +237,7 @@ export default function BookingBoard({
             {slots.map((s) => {
               const isSel = s.startAt === selected;
               const ring = isSel ? { outline: "2px solid #60a5fa" } : {};
+              const multi = (s.capacity ?? 1) > 1; // área com mais de uma vaga (Pilates)
 
               if (s.mine) {
                 return (
@@ -243,7 +249,9 @@ export default function BookingBoard({
                   >
                     {hhmm(s.startAt)}
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
-                      sua reserva {s.partnerLabel ? "· dupla 🎾" : ""}
+                      {multi
+                        ? `sua vaga · ${s.confirmedCount}/${s.capacity}`
+                        : `sua reserva ${s.partnerLabel ? "· dupla 🎾" : ""}`}
                     </div>
                   </button>
                 );
@@ -258,10 +266,12 @@ export default function BookingBoard({
                   >
                     {hhmm(s.startAt)}
                     <div style={{ fontSize: 11, fontWeight: 400 }}>
-                      {s.ownerName
-                        ? shortLabel(s.ownerName) + (s.ownerUnit ? " " + s.ownerUnit : "")
-                        : "ocupado"}
-                      {s.partnerName ? " + " + shortLabel(s.partnerName) : ""}
+                      {multi
+                        ? `lotado ${s.confirmedCount}/${s.capacity}`
+                        : (s.ownerName
+                            ? shortLabel(s.ownerName) + (s.ownerUnit ? " " + s.ownerUnit : "")
+                            : "ocupado") +
+                          (s.partnerName ? " + " + shortLabel(s.partnerName) : "")}
                       {s.iAmWaiting ? " · na fila" : ""}
                     </div>
                   </button>
@@ -297,7 +307,13 @@ export default function BookingBoard({
                 >
                   {hhmm(s.startAt)}
                   <div style={{ fontSize: 11, fontWeight: 400, color: s.openMatch ? "var(--accent-700)" : "var(--muted)" }}>
-                    {busy === s.startAt ? "..." : s.openMatch ? "🎾 quer dupla" : "livre"}
+                    {busy === s.startAt
+                      ? "..."
+                      : s.openMatch
+                        ? "🎾 quer dupla"
+                        : multi
+                          ? `${s.confirmedCount}/${s.capacity} · livre`
+                          : "livre"}
                   </div>
                 </button>
               );
@@ -322,6 +338,15 @@ export default function BookingBoard({
             {prettyDate(date)} · das {hhmm(selectedSlot.startAt)} às {hhmm(selectedSlot.endAt)}.
             Faltar sem cancelar gera bloqueio temporário.
           </p>
+          {(selectedSlot.capacity ?? 1) > 1 && (
+            <p style={{ marginTop: -6 }}>
+              🧘 <strong>{selectedSlot.spotsLeft}</strong> de {selectedSlot.capacity} vagas
+              livres neste horário.
+              {(selectedSlot.occupants?.length ?? 0) > 0 && (
+                <> Já reservaram: {selectedSlot.occupants!.join(", ")}.</>
+              )}
+            </p>
+          )}
 
           {/* Alguém já está procurando parceiro neste horário */}
           {allowMatch && selectedSlot.openMatch && !selectedSlot.openMatchMine && (
@@ -389,7 +414,15 @@ export default function BookingBoard({
             </button>
           </div>
           <p>
-            {selectedSlot.ownerLabel ? (
+            {(selectedSlot.capacity ?? 1) > 1 ? (
+              <>
+                Horário <strong>lotado</strong> ({selectedSlot.confirmedCount}/
+                {selectedSlot.capacity}).
+                {(selectedSlot.occupants?.length ?? 0) > 0 && (
+                  <> Reservado por <strong>{selectedSlot.occupants!.join(", ")}</strong>.</>
+                )}
+              </>
+            ) : selectedSlot.ownerLabel ? (
               <>
                 Reservado por <strong>{selectedSlot.ownerLabel}</strong>
                 {selectedSlot.mine && " (você)"}

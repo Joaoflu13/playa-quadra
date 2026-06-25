@@ -4,15 +4,50 @@ export const TZ_OFFSET = "-03:00";
 // Single court: id fixo semeado pelo seed. No V2 isto vira parâmetro.
 export const COURT_ID = "court-1";
 
-/** Áreas reserváveis (cada uma é um "court" no banco). */
-export const COURTS = [
+/**
+ * Áreas reserváveis (cada uma é um "court" no banco).
+ * Campos opcionais sobrescrevem a regra global (RuleConfig) só para aquela área:
+ *  - `capacity`: vagas por horário (default 1). A Sala de Pilates aceita 2 moradores.
+ *  - `openHour`/`closeHour`: janela de funcionamento própria (default = RuleConfig).
+ */
+export type CourtDef = {
+  id: string;
+  name: string;
+  capacity?: number;
+  openHour?: number;
+  closeHour?: number;
+};
+
+export const COURTS: CourtDef[] = [
   { id: "court-1", name: "Quadra de Tênis" },
   { id: "court-2", name: "Mesa de Sinuca" },
-] as const;
+  { id: "court-3", name: "Sala de Pilates", capacity: 2, openHour: 5, closeHour: 24 },
+];
 
 /** true se o id é uma área conhecida. */
 export function isValidCourt(id: string | null | undefined): boolean {
   return COURTS.some((c) => c.id === id);
+}
+
+/** Retorna o nome legível de uma área pelo id (ex.: "court-2" → "Mesa de Sinuca"). */
+export function courtLabel(id: string): string {
+  return COURTS.find((c) => c.id === id)?.name ?? "Área comum";
+}
+
+/**
+ * Configuração efetiva de uma área: capacidade e janela de funcionamento,
+ * usando os overrides da área quando houver, senão a regra global (RuleConfig).
+ */
+export function courtSettings(
+  courtId: string,
+  global: { openHour: number; closeHour: number }
+): { capacity: number; openHour: number; closeHour: number } {
+  const c = COURTS.find((x) => x.id === courtId);
+  return {
+    capacity: c?.capacity ?? 1,
+    openHour: c?.openHour ?? global.openHour,
+    closeHour: c?.closeHour ?? global.closeHour,
+  };
 }
 
 /**

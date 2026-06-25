@@ -160,6 +160,23 @@ export default async function AdminPage() {
         )}
       </section>
 
+      {/* === Exportar dados (LGPD) === */}
+      <section className="card" style={{ marginBottom: 20 }}>
+        <h2 style={{ marginTop: 0 }}>Exportar dados</h2>
+        <p className="muted">
+          Baixe os dados do condomínio em CSV (abre no Excel). Disponível a
+          qualquer momento — os dados são seus.
+        </p>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginTop: 8 }}>
+          <a className="btn btn-2" href="/api/admin/export?type=residents" download>
+            ↓ Moradores (CSV)
+          </a>
+          <a className="btn btn-2" href="/api/admin/export?type=bookings" download>
+            ↓ Reservas (CSV)
+          </a>
+        </div>
+      </section>
+
       {/* === Regras === */}
       <section className="card" style={{ marginBottom: 20 }}>
         <h2 style={{ marginTop: 0 }}>Regras de reserva</h2>
