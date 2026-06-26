@@ -4,6 +4,7 @@ import { auth, signOut } from "@/lib/auth";
 import { prisma } from "@/lib/db";
 import AreaReveal from "@/components/AreaReveal";
 import NotificationsBell from "@/components/NotificationsBell";
+import HomeSpotlight from "@/components/HomeSpotlight";
 
 export default async function HomePage() {
   const session = await auth();
@@ -23,7 +24,8 @@ export default async function HomePage() {
 
   return (
     <main className="home-bg">
-      <div className="container">
+      <HomeSpotlight />
+      <div className="container" style={{ position: "relative", zIndex: 1 }}>
       <div className="row" style={{ marginBottom: 16, flexWrap: "wrap" }}>
         <span className="muted">
           Olá, <strong style={{ color: "var(--text)" }}>{session.user.name}</strong>

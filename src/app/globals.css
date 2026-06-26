@@ -267,14 +267,68 @@ label {
   backdrop-filter: blur(2px);
 }
 
-/* === Fundo da página logada (foto do condomínio, bem suave) === */
+/* === Fundo executivo escuro (página logada) === */
 .home-bg {
   min-height: 100vh;
-  background-image: linear-gradient(rgba(231, 241, 251, 0.28), rgba(234, 243, 238, 0.36)),
-    url("/condominio.jpg");
-  background-size: cover;
-  background-position: center;
-  background-attachment: fixed;
+  position: relative;
+  isolation: isolate;
+  background: #06080b;
+
+  /* Tema escuro: sobrescreve variáveis para todo o escopo */
+  --surface:    rgba(255, 255, 255, 0.055);
+  --surface-2:  rgba(255, 255, 255, 0.09);
+  --border:     rgba(255, 255, 255, 0.10);
+  --text:       #dde3ec;
+  --muted:      #68788a;
+  --panel:      rgba(255, 255, 255, 0.055);
+  --panel-2:    rgba(255, 255, 255, 0.09);
+  --danger-bg:  rgba(192, 57, 43, 0.12);
+}
+
+/* Blobs de cor animados — aurora discreta */
+.home-bg::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(ellipse 55% 45% at 8%  8%,  rgba(46, 125, 91,  0.18) 0%, transparent 60%),
+    radial-gradient(ellipse 45% 55% at 92% 92%, rgba(20,  55, 100,  0.20) 0%, transparent 60%),
+    radial-gradient(ellipse 70% 70% at 50% 50%, rgba(8,  12,  20,  0.60) 0%, transparent 80%);
+  animation: home-aurora 14s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+@keyframes home-aurora {
+  0%   { transform: scale(1)    translate(0%,    0%);   opacity: 1;    }
+  50%  { transform: scale(1.03) translate(0.8%,  0.5%); opacity: 0.82; }
+  100% { transform: scale(1.06) translate(0%,    1%);   opacity: 1;    }
+}
+
+/* Glass nos cards */
+.home-bg .card {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.10);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Sombra profunda nos heroes para contraste */
+.home-bg .hero {
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.6);
+}
+
+/* Slot bloqueado adaptado ao fundo escuro */
+.home-bg .slot-blocked {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(192, 57, 43, 0.18),
+    rgba(192, 57, 43, 0.18) 8px,
+    rgba(192, 57, 43, 0.10) 8px,
+    rgba(192, 57, 43, 0.10) 16px
+  );
+  border-color: rgba(192, 57, 43, 0.35);
+  color: #e07070;
 }
 
 /* === Tela de login dividida: foto à esquerda, formulário à direita === */
