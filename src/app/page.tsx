@@ -52,7 +52,6 @@ export default async function HomePage() {
         withPhoto
         photoSrc="/sinuca.jpg"
         photoAlt="Mesa de sinuca do Playa del Mago"
-        photoTall
         photoObjectPosition="center 55%"
         allowMatch={false}
       />
@@ -62,7 +61,6 @@ export default async function HomePage() {
         withPhoto
         photoSrc="/pilates.jpg"
         photoAlt="Sala de pilates do Playa del Mago"
-        photoTall
         photoObjectPosition="center 42%"
         allowMatch={false}
       />
