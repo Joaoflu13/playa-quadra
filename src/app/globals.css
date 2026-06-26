@@ -226,25 +226,10 @@ label {
   display: block;
 }
 
-/* Modo "contain": mostra a foto inteira (sem recorte), com fundo desfocado
-   da própria imagem nas laterais. Bom para fotos verticais (sinuca/pilates). */
-.hero--contain {
-  height: 300px;
-  background: #0b1220;
-}
-.hero--contain img {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-}
-.hero-blur {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  background-size: cover;
-  background-position: center;
-  filter: blur(22px) brightness(0.55);
-  transform: scale(1.18);
+/* Banner mais alto para fotos verticais (sinuca/pilates): a foto preenche
+   o retângulo (cover, sem tarjas) e, sendo mais alto, mostra mais da cena. */
+.hero--tall img {
+  height: 380px;
 }
 .hero-overlay {
   position: absolute;
