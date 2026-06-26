@@ -54,7 +54,7 @@ export default function AreaReveal({
           <CourtPhoto
             src={photoSrc}
             alt={photoAlt}
-            title={photoSrc ? title : undefined}
+            title={title}
             tall={photoTall}
             objectPosition={photoObjectPosition}
             hint={open ? "Toque para recolher ▴" : "Toque para ver os horários ▾"}
