@@ -7,11 +7,9 @@ import { useState } from "react";
  * Por padrão usa a foto da quadra de tênis; aceita `src`/`alt`/`title` para
  * reutilizar em outras áreas (ex.: Mesa de Sinuca, Sala de Pilates).
  *
- * `fit`:
- *  - "cover" (default): a foto preenche o banner (pode recortar). Ideal p/ fotos
- *    horizontais como a da quadra.
- *  - "contain": mostra a foto INTEIRA (sem recorte), com um fundo desfocado da
- *    própria imagem preenchendo as laterais. Ideal p/ fotos verticais.
+ * A foto sempre PREENCHE o retângulo (object-fit: cover), sem tarjas.
+ * `tall`: banner mais alto — para fotos verticais, mostra mais da cena sem
+ * recortar tanto (efeito menos "de perto"). `objectPosition` ajusta o recorte.
  *
  * Enquanto o arquivo não existir, mostra um fundo degradê no lugar da foto.
  * `hint` (opcional) mostra uma chamada de ação no canto.
@@ -21,21 +19,20 @@ export default function CourtPhoto({
   alt = "Quadra de tênis do Playa del Mago",
   title,
   hint,
-  fit = "cover",
+  tall = false,
   objectPosition = "center 82%",
 }: {
   src?: string;
   alt?: string;
   title?: string;
   hint?: string;
-  fit?: "cover" | "contain";
+  tall?: boolean;
   objectPosition?: string;
 }) {
   const [failed, setFailed] = useState(false);
-  const contain = fit === "contain";
 
   return (
-    <div className={`hero${contain ? " hero--contain" : ""}`}>
+    <div className={`hero${tall ? " hero--tall" : ""}`}>
       {failed ? (
         <div
           style={{
@@ -44,18 +41,7 @@ export default function CourtPhoto({
           }}
         />
       ) : (
-        <>
-          {contain && (
-            // Fundo desfocado da própria foto, preenche as laterais sem tarjas.
-            <div className="hero-blur" style={{ backgroundImage: `url(${src})` }} aria-hidden />
-          )}
-          <img
-            src={src}
-            alt={alt}
-            style={contain ? { objectFit: "contain", objectPosition: "center" } : { objectPosition }}
-            onError={() => setFailed(true)}
-          />
-        </>
+        <img src={src} alt={alt} style={{ objectPosition }} onError={() => setFailed(true)} />
       )}
       <div className="hero-overlay">
         <span className="eyebrow">Playa del Mago · Barra da Tijuca</span>

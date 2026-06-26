@@ -52,7 +52,8 @@ export default async function HomePage() {
         withPhoto
         photoSrc="/sinuca.jpg"
         photoAlt="Mesa de sinuca do Playa del Mago"
-        photoFit="contain"
+        photoTall
+        photoObjectPosition="center 55%"
         allowMatch={false}
       />
       <AreaReveal
@@ -61,7 +62,8 @@ export default async function HomePage() {
         withPhoto
         photoSrc="/pilates.jpg"
         photoAlt="Sala de pilates do Playa del Mago"
-        photoFit="contain"
+        photoTall
+        photoObjectPosition="center 42%"
         allowMatch={false}
       />
       </div>
