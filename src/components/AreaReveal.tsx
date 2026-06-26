@@ -18,6 +18,7 @@ export default function AreaReveal({
   withPhoto = false,
   photoSrc,
   photoAlt,
+  photoFit,
   photoObjectPosition,
   allowMatch = true,
 }: {
@@ -27,6 +28,7 @@ export default function AreaReveal({
   withPhoto?: boolean;
   photoSrc?: string;
   photoAlt?: string;
+  photoFit?: "cover" | "contain";
   photoObjectPosition?: string;
   allowMatch?: boolean;
 }) {
@@ -53,6 +55,7 @@ export default function AreaReveal({
             src={photoSrc}
             alt={photoAlt}
             title={photoSrc ? title : undefined}
+            fit={photoFit}
             objectPosition={photoObjectPosition}
             hint={open ? "Toque para recolher ▴" : "Toque para ver os horários ▾"}
           />
