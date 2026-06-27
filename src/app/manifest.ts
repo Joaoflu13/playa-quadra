@@ -1,13 +1,11 @@
 import type { MetadataRoute } from "next";
+import { CONDO } from "@/lib/config";
 
-// Manifesto PWA: permite "instalar" o site como app (Android/Chrome) e dá
-// nome/ícone na tela de início (iOS/Android). O Next serve isto em
-// /manifest.webmanifest e injeta o <link rel="manifest"> automaticamente.
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Quadra de Tênis · Playa del Mago",
-    short_name: "Quadra Playa",
-    description: "Reserva da quadra de tênis do condomínio Playa del Mago.",
+    name: `${CONDO.shortName} · ${CONDO.name}`,
+    short_name: CONDO.shortName,
+    description: `Reserva de áreas comuns do condomínio ${CONDO.name}.`,
     start_url: "/",
     display: "standalone",
     background_color: "#ffffff",

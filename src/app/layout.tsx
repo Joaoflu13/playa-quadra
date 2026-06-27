@@ -1,12 +1,13 @@
 import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import InstallPrompt from "@/components/InstallPrompt";
+import { CONDO } from "@/lib/config";
 
 export const metadata: Metadata = {
-  title: "Quadra de Tênis · Playa del Mago",
-  description: "Agendamento da quadra de tênis — Condomínio Playa del Mago, Barra da Tijuca",
-  applicationName: "Quadra Playa",
-  appleWebApp: { capable: true, title: "Quadra Playa", statusBarStyle: "default" },
+  title: `${CONDO.shortName} · ${CONDO.name}`,
+  description: `Agendamento de áreas comuns — Condomínio ${CONDO.name}, ${CONDO.location}`,
+  applicationName: CONDO.shortName,
+  appleWebApp: { capable: true, title: CONDO.shortName, statusBarStyle: "default" },
   icons: { icon: "/icon-192.png", apple: "/apple-icon.png" },
 };
 

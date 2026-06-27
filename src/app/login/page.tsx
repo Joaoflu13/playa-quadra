@@ -4,6 +4,7 @@ import { AuthError } from "next-auth";
 import { auth, signIn } from "@/lib/auth";
 import { onlyDigits } from "@/lib/cpf";
 import { isLocked } from "@/lib/rateLimit";
+import { CONDO } from "@/lib/config";
 
 export default async function LoginPage({
   searchParams,
@@ -43,8 +44,8 @@ export default async function LoginPage({
     <main className="login-split">
       <div className="login-split__photo">
         <div className="brand">
-          <div className="eyebrow">Barra da Tijuca</div>
-          <div className="name">Playa del Mago</div>
+          <div className="eyebrow">{CONDO.location}</div>
+          <div className="name">{CONDO.name}</div>
         </div>
       </div>
       <div className="login-split__form">

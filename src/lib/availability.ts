@@ -1,15 +1,11 @@
+import { AREAS } from "./config";
+
 // America/Sao_Paulo é UTC-3 fixo (horário de verão extinto no Brasil desde 2019).
 export const TZ_OFFSET = "-03:00";
 
 // Single court: id fixo semeado pelo seed. No V2 isto vira parâmetro.
 export const COURT_ID = "court-1";
 
-/**
- * Áreas reserváveis (cada uma é um "court" no banco).
- * Campos opcionais sobrescrevem a regra global (RuleConfig) só para aquela área:
- *  - `capacity`: vagas por horário (default 1). A Sala de Pilates aceita 2 moradores.
- *  - `openHour`/`closeHour`: janela de funcionamento própria (default = RuleConfig).
- */
 export type CourtDef = {
   id: string;
   name: string;
@@ -18,11 +14,14 @@ export type CourtDef = {
   closeHour?: number;
 };
 
-export const COURTS: CourtDef[] = [
-  { id: "court-1", name: "Quadra de Tênis" },
-  { id: "court-2", name: "Mesa de Sinuca" },
-  { id: "court-3", name: "Sala de Pilates", capacity: 2, openHour: 5, closeHour: 24 },
-];
+/** Derivado de AREAS em config.ts — edite lá para adicionar/remover áreas. */
+export const COURTS: CourtDef[] = AREAS.map((a) => ({
+  id: a.courtId,
+  name: a.title,
+  capacity: a.capacity,
+  openHour: a.openHour,
+  closeHour: a.closeHour,
+}));
 
 /** true se o id é uma área conhecida. */
 export function isValidCourt(id: string | null | undefined): boolean {

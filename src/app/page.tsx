@@ -5,6 +5,7 @@ import { prisma } from "@/lib/db";
 import AreaReveal from "@/components/AreaReveal";
 import NotificationsBell from "@/components/NotificationsBell";
 import HomeSpotlight from "@/components/HomeSpotlight";
+import { AREAS } from "@/lib/config";
 
 export default async function HomePage() {
   const session = await auth();
@@ -47,25 +48,18 @@ export default async function HomePage() {
           </form>
         </div>
       </div>
-      <AreaReveal courtId="court-1" title="Quadra de Tênis" withPhoto allowMatch />
-      <AreaReveal
-        courtId="court-2"
-        title="Mesa de Sinuca"
-        withPhoto
-        photoSrc="/sinuca.jpg"
-        photoAlt="Mesa de sinuca do Playa del Mago"
-        photoObjectPosition="center 55%"
-        allowMatch={false}
-      />
-      <AreaReveal
-        courtId="court-3"
-        title="Sala de Pilates"
-        withPhoto
-        photoSrc="/pilates.jpg"
-        photoAlt="Sala de pilates do Playa del Mago"
-        photoObjectPosition="center 42%"
-        allowMatch={false}
-      />
+      {AREAS.map((area) => (
+        <AreaReveal
+          key={area.courtId}
+          courtId={area.courtId}
+          title={area.title}
+          withPhoto
+          photoSrc={area.photo.src}
+          photoAlt={area.photo.alt}
+          photoObjectPosition={area.photo.objectPosition}
+          allowMatch={area.allowMatch}
+        />
+      ))}
       </div>
     </main>
   );
