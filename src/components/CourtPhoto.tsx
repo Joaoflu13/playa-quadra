@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { CONDO } from "@/lib/config";
 
 /**
  * Banner (hero) com a foto de uma área e a marca sobreposta.
@@ -44,7 +45,7 @@ export default function CourtPhoto({
         <img src={src} alt={alt} style={{ objectPosition }} onError={() => setFailed(true)} />
       )}
       <div className="hero-overlay">
-        <span className="eyebrow">Playa del Mago · Barra da Tijuca</span>
+        <span className="eyebrow">{CONDO.name} · {CONDO.location}</span>
         {title && <span className="title">{title}</span>}
         {hint && <span className="hero-hint">{hint}</span>}
         {failed && (
