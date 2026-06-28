@@ -1,5 +1,5 @@
 # Proposta Comercial — Sistema de Reserva de Áreas Comuns
-### Quadra de Tênis e Mesa de Sinuca · Condomínio Playa del Mago — Barra da Tijuca, RJ
+### Quadra de Tênis, Mesa de Sinuca e Sala de Pilates · Condomínio Playa Del Mago — Barra da Tijuca, RJ
 
 **Apresentado por:** [seu nome] · **Data:** ____/____/______ · **Validade:** 30 dias
 
@@ -14,11 +14,11 @@ consequência, brigas entre moradores e trabalho extra para a administração.
 ## 2. A solução (já no ar e funcionando)
 
 Um sistema online onde **cada morador tem login próprio (por CPF)** e reserva o horário da
-**quadra de tênis** e da **mesa de sinuca** pelo celular, com regras automáticas. **Já está em
+**quadra de tênis**, da **mesa de sinuca** e da **sala de pilates** pelo celular, com regras automáticas. **Já está em
 produção** em `https://playa-quadra.vercel.app` — não é protótipo.
 
 ### O que cada morador ganha
-- Ver a grade da **quadra** e da **sinuca** em tempo real e **reservar/cancelar pelo celular**.
+- Ver a grade da **quadra**, da **sinuca** e da **sala de pilates** em tempo real e **reservar/cancelar pelo celular**.
 - Saber **quem já marcou** (nome e apartamento).
 - **Lista de espera:** entra na fila de um horário cheio e é avisado se vagar.
 - **"Procurar parceiro"** na quadra: abre o horário e fecha a dupla com outro morador.
@@ -29,9 +29,8 @@ produção** em `https://playa-quadra.vercel.app` — não é protótipo.
 - **Painel administrativo** com **relatório de uso** (ocupação, reservas, cancelamentos,
   faltas e ranking de moradores).
 - **Regras configuráveis sem programador:** horário de funcionamento, antecedência,
-  limite de reservas por morador, multa por falta.
+  limite de reservas por morador, suspensão por falta.
 - **Bloqueio da área** para manutenção, torneio ou evento.
-- **Reserva fixa semanal** (ex.: aula de tênis no mesmo horário).
 - **Faltou? Bloqueio automático** do morador por X dias (configurável).
 - Cadastro de moradores **individual ou em massa (CSV)**; suspender/reativar; reset de senha.
 - **Zero infraestrutura para o condomínio:** roda 100% na nuvem, sem servidor, sem instalação.
@@ -44,7 +43,7 @@ produção** em `https://playa-quadra.vercel.app` — não é protótipo.
 | Item | Valor |
 |---|---|
 | **Taxa de implantação** (única, na contratação) | **R$ 500** |
-| **Mensalidade — Quadra de Tênis + Mesa de Sinuca** | **R$ 395/mês** (R$ 2,50/unidade) |
+| **Mensalidade — Quadra de Tênis + Mesa de Sinuca + Sala de Pilates** | **R$ 395/mês** (R$ 2,50/unidade) |
 | Nova área comum (add-on) | **+R$ 100/mês** cada |
 | Hospedagem e cadastro inicial dos moradores | **inclusos** |
 
@@ -56,7 +55,7 @@ ajuste das regras, cadastro/suporte ao síndico. (Detalhe no Anexo de Escopo.)
 
 ## 4. Roadmap (crescer junto com o condomínio)
 
-O sistema já cobre **quadra de tênis** e **mesa de sinuca**. O mesmo sistema adiciona novas
+O sistema já cobre **quadra de tênis**, **mesa de sinuca** e **sala de pilates**. O mesmo sistema adiciona novas
 áreas comuns — cada uma com **suas próprias regras** — por **+R$ 100/mês cada**:
 - Churrasqueira / espaço gourmet
 - Salão de festas
@@ -65,7 +64,7 @@ O sistema já cobre **quadra de tênis** e **mesa de sinuca**. O mesmo sistema a
 ## 5. Por que agora
 
 - Produto **pronto e em produção** — implantação em dias, não meses.
-- Já cobre **duas áreas** (quadra + sinuca) e cresce junto com o condomínio.
+- Já cobre **três áreas** (quadra de tênis, mesa de sinuca e sala de pilates) e cresce junto com o condomínio.
 - Melhora a convivência e **valoriza a gestão do síndico** perante os moradores.
 
 ## 6. Próximos passos
