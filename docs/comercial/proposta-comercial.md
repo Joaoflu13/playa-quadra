@@ -62,7 +62,7 @@ O sistema já cobre **quadra de tênis**, **mesa de sinuca** e **sala de pilates
 áreas comuns — cada uma com **suas próprias regras** — por **+R$ 100/mês cada**:
 - Churrasqueira / espaço gourmet
 - Salão de festas
-- Academia, quadra de futsal, espaço pet, etc.
+- Academia, quadra de futsal, sauna, etc.
 
 ## 5. Por que agora
 
