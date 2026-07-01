@@ -50,6 +50,9 @@ produção** em `https://playa-quadra.vercel.app` — não é protótipo.
 A **taxa de implantação** cobre a configuração inicial, o cadastro/pré-autorização dos
 moradores e a colocação do sistema em operação para o condomínio.
 
+A **mensalidade é reajustada uma vez por ano pela inflação do período** (IPCA), a contar da
+data de contratação.
+
 **Tudo de manutenção incluso:** hospedagem, correção de erros, atualizações de segurança,
 ajuste das regras, cadastro/suporte ao síndico. (Detalhe no Anexo de Escopo.)
 
