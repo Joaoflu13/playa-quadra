@@ -37,13 +37,13 @@ produção** em `https://playa-quadra.vercel.app` — não é protótipo.
 
 ## 3. Investimento
 
-> **158 pessoas** (156 apartamentos + síndico + administrador). O custo é de
-> **R$ 2,50 por pessoa/mês** — cerca de R$ 30 por morador no ano inteiro.
+> **156 apartamentos.** O custo é de cerca de **R$ 2,50 por apartamento/mês** —
+> cerca de R$ 30 por apartamento no ano inteiro.
 
 | Item | Valor |
 |---|---|
 | **Taxa de implantação** (única, na contratação) | **R$ 500** |
-| **Mensalidade — Quadra de Tênis + Mesa de Sinuca + Sala de Pilates** | **R$ 395/mês** (R$ 2,50/unidade) |
+| **Mensalidade — Quadra de Tênis + Mesa de Sinuca + Sala de Pilates** | **R$ 395/mês** (cerca de R$ 2,50/apartamento) |
 | Nova área comum (add-on) | **+R$ 100/mês** cada |
 | Hospedagem e cadastro inicial dos moradores | **inclusos** |
 
