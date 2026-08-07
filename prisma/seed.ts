@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
+import { AREAS } from "../src/lib/config";
 
 const prisma = new PrismaClient();
 
@@ -18,11 +19,14 @@ function cpfFromBase(base9: string): string {
 }
 
 async function main() {
-  await prisma.court.upsert({
-    where: { id: "court-1" },
-    update: {},
-    create: { id: "court-1", name: "Quadra de Tênis" },
-  });
+  // Cria todas as áreas do config.ts (não só a quadra), para bater com a home.
+  for (const area of AREAS) {
+    await prisma.court.upsert({
+      where: { id: area.courtId },
+      update: { name: area.title },
+      create: { id: area.courtId, name: area.title },
+    });
+  }
 
   // Config singleton (usa os defaults atuais do schema: 8h–22h, 24h, etc.).
   await prisma.ruleConfig.upsert({ where: { id: 1 }, update: {}, create: { id: 1 } });
