@@ -20,7 +20,7 @@ export async function isLocked(key: string): Promise<boolean> {
     if (!row?.lockedUntil) return false;
     if (row.lockedUntil > new Date()) return true;
     // Bloqueio expirou: limpa.
-    await prisma.rateLimit.delete({ where: { key } }).catch(() => {});
+    await prisma.rateLimit.deleteMany({ where: { key } });
     return false;
   } catch {
     return false; // falha no banco não bloqueia o fluxo
@@ -59,8 +59,8 @@ export async function registerFailure(key: string): Promise<void> {
 /** Login/ativação bem-sucedido: zera o contador. */
 export async function clearFailures(key: string): Promise<void> {
   try {
-    await prisma.rateLimit.delete({ where: { key } });
+    await prisma.rateLimit.deleteMany({ where: { key } });
   } catch {
-    // Linha pode não existir se nunca houve falha — ignorar.
+    // deleteMany não lança se a linha não existir; catch só cobre falha de banco.
   }
 }
